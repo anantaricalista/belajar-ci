@@ -20,7 +20,9 @@ Pada Apache XAMPP, aktifkan `mod_rewrite` dan izinkan `AllowOverride FileInfo` (
 
 Saat memasang dalam subdirektori, sertakan subdirektori tersebut di `base_url` dan tujuan fallback Nginx. `base_url` dapat diatur di `application/config/config.php` atau melalui variabel lingkungan `CI_BASE_URL`, misalnya `http://localhost:8000/belajar-ci/`. Nilai ini harus sesuai alamat pemasangan dan berakhir dengan `/`; terutama saat menggunakan server bawaan PHP dalam subdirektori, jangan mengandalkan deteksi otomatis. Uji URL modul secara langsung dan setelah refresh, serta pastikan aset tetap bisa diakses.
 
-CI3 adalah framework lama. Beberapa versi PHP terbaru dapat menampilkan peringatan deprecation dari kode framework bawaan; peringatan tersebut harus ditinjau sebelum aplikasi digunakan di lingkungan target. Jangan menggunakan versi PHP yang tidak lagi didukung sebagai solusi produksi.
+Situs menggunakan mode `production` secara bawaan, termasuk ketika diunggah ke hosting DirectAdmin, sehingga error tidak ditampilkan kepada pengunjung. Untuk pengembangan lokal, atur variabel lingkungan `CI_ENV=development` pada server; jangan gunakan mode development di situs publik. Atur juga `CI_BASE_URL` atau `base_url` sesuai URL hosting, termasuk garis miring di akhir.
+
+CI3 adalah framework lama. Beberapa versi PHP terbaru dapat menampilkan peringatan deprecation dari kode framework bawaan; peringatan tersebut harus ditinjau sebelum aplikasi digunakan di lingkungan target. Mode production menyembunyikan peringatan, bukan menjamin kompatibilitas PHP. Jika hosting menampilkan error 500, periksa Error Log domain di DirectAdmin untuk menemukan penyebabnya. Jangan menggunakan versi PHP yang tidak lagi didukung sebagai solusi produksi.
 
 Jika peringatan CI3 memenuhi halaman saat mencoba situs pada PHP terbaru, pratinjau lokal dapat dijalankan dalam mode testing:
 
