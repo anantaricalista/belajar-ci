@@ -41,7 +41,7 @@ CODE
 	'routing-controller' => array(
 		'category' => 'FONDASI', 'title' => 'Routing & controller', 'duration' => 4,
 		'summary' => 'Ikuti perjalanan URL menuju controller dan buat halaman artikel pertamamu.',
-		'goals' => array('Membuat controller dan method publik di CI3.', 'Memetakan URL menggunakan routes.php.', 'Menangani parameter dan halaman tidak ditemukan.'),
+		'goals' => array('Membuat controller dan method publik di CI3.', 'Memetakan URL menggunakan routes.php dan menghilangkan index.php dari URL.', 'Menangani parameter dan halaman tidak ditemukan.'),
 		'sections' => array(
 			array('title' => 'Controller menerima request', 'paragraphs' => array('Nama file dan class controller menggunakan huruf awal kapital, misalnya Artikel.php dan Artikel. Class mewarisi CI_Controller. Method publik dapat dipetakan ke URL; hindari menjadikan method internal sebagai endpoint publik.'), 'file' => 'application/controllers/Artikel.php', 'code' => <<<'CODE'
 <?php
@@ -65,16 +65,30 @@ class Artikel extends CI_Controller {
 }
 CODE
 			),
-			array('title' => 'Petakan URL', 'paragraphs' => array('Tambahkan route berikut di proyek latihan. (:num) hanya cocok untuk segmen angka, lalu $1 diteruskan ke method. Urutan route penting: letakkan route khusus sebelum pola yang lebih umum. Contoh URL lokal adalah /index.php/artikel/12.'), 'file' => 'application/config/routes.php', 'code' => <<<'CODE'
+			array('title' => 'Petakan URL', 'paragraphs' => array('Tambahkan route berikut di proyek latihan. (:num) hanya cocok untuk segmen angka, lalu $1 diteruskan ke method. Urutan route penting: letakkan route khusus sebelum pola yang lebih umum. Setelah konfigurasi URL bersih berikut diterapkan, contoh URL lokal adalah /artikel/12.'), 'file' => 'application/config/routes.php', 'code' => <<<'CODE'
 $route['artikel'] = 'artikel/index';
 $route['artikel/(:num)'] = 'artikel/detail/$1';
 CODE
 			),
+			array('title' => 'Hilangkan index.php dari URL', 'paragraphs' => array('CI3 tetap membutuhkan file index.php sebagai front controller. Yang dihilangkan hanya bagian URL-nya: server meneruskan request ke file tersebut secara internal, lalu CI3 membaca URI dan memilih route. Mengubah routes.php saja tidak cukup.', 'Pada salinan proyek latihan, kosongkan index_page di application/config/config.php agar site_url() menghasilkan tautan tanpa index.php. Atur base_url sesuai lokasi proyek; untuk produksi nilainya harus eksplisit dan berakhir dengan garis miring.'), 'file' => 'application/config/config.php', 'code' => <<<'CODE'
+$config['base_url'] = 'http://localhost:8000/';
+$config['index_page'] = '';
+CODE
+			),
+			array('title' => 'Konfigurasi server dan uji URL langsung', 'paragraphs' => array('Pada Apache, buat .htaccess di root proyek seperti berikut. Aktifkan mod_rewrite dan AllowOverride yang mengizinkan FileInfo. Aturan ini meneruskan URL yang bukan file atau direktori nyata ke index.php; CSS dan JavaScript tetap dilayani sebagai file statis. Query string tetap diteruskan.', 'Server pengembangan PHP dapat meneruskan URL yang tidak ditemukan ke index.php tanpa membaca .htaccess. Nginx tidak membaca .htaccess dan membutuhkan konfigurasi try_files yang setara serta pengaturan PHP dan pembatasan akses folder internal. Uji URL langsung dan refresh; jika muncul 404 dari server, periksa konfigurasi rewrite dan lokasi proyek, bukan hanya routes.php. Jangan menghapus file index.php.'), 'file' => '.htaccess di root proyek Apache', 'code' => <<<'CODE'
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+CODE
+			),
 			array('title' => 'Tangani input dan 404', 'paragraphs' => array('Route bukan pengganti validasi pada controller: URL bawaan CI3 juga dapat mengakses method publik. Periksa parameter sebelum menggunakannya dan panggil show_404() untuk resource yang tidak ada. Pada modul database, keberadaan ID juga harus diperiksa.'))
 		),
-		'exercise' => array('title' => 'Buat dua endpoint', 'intro' => 'Gunakan controller Artikel dalam proyek latihan.', 'steps' => array('Tambahkan route daftar dan detail artikel.', 'Buka /index.php/artikel dan /index.php/artikel/12.', 'Coba parameter yang tidak valid, termasuk akses langsung ke method controller.'), 'criteria' => 'Daftar dan detail dapat diakses, sedangkan parameter tidak valid tidak menghasilkan halaman detail yang berhasil.'),
-		'review' => array(array('question' => 'Apa fungsi (:num) dan $1?', 'answer' => '(:num) mencocokkan segmen angka; $1 meneruskan segmen yang cocok ke tujuan route.'), array('question' => 'Mengapa parameter tetap divalidasi di controller?', 'answer' => 'Method publik dapat diakses melalui routing lain; route tidak menjamin semua jalur masuk memiliki validasi yang sama.')),
-		'resources' => array(array('title' => 'Controller CI3', 'url' => 'https://codeigniter.com/userguide3/general/controllers.html'), array('title' => 'URI routing', 'url' => 'https://codeigniter.com/userguide3/general/routing.html'))
+		'exercise' => array('title' => 'Buat dua endpoint', 'intro' => 'Gunakan controller Artikel dalam proyek latihan.', 'steps' => array('Tambahkan route daftar dan detail artikel, lalu konfigurasikan URL bersih untuk server latihan.', 'Buka /artikel dan /artikel/12 secara langsung, lalu refresh halaman detail.', 'Pastikan file statis masih dimuat dan coba parameter yang tidak valid, termasuk akses langsung ke method controller.'), 'criteria' => 'Daftar dan detail dapat diakses tanpa index.php, termasuk setelah refresh; file statis tetap tersedia dan parameter tidak valid tidak menghasilkan halaman detail yang berhasil.'),
+		'review' => array(array('question' => 'Apa fungsi (:num) dan $1?', 'answer' => '(:num) mencocokkan segmen angka; $1 meneruskan segmen yang cocok ke tujuan route.'), array('question' => 'Apakah file index.php boleh dihapus setelah URL dibersihkan?', 'answer' => 'Tidak. Server tetap meneruskan request ke index.php sebagai front controller; hanya penulisannya pada URL yang dihilangkan.'), array('question' => 'Mengapa parameter tetap divalidasi di controller?', 'answer' => 'Method publik dapat diakses melalui routing lain; route tidak menjamin semua jalur masuk memiliki validasi yang sama.')),
+		'resources' => array(array('title' => 'Controller CI3', 'url' => 'https://codeigniter.com/userguide3/general/controllers.html'), array('title' => 'URI routing', 'url' => 'https://codeigniter.com/userguide3/general/routing.html'), array('title' => 'URL CodeIgniter dan mod_rewrite', 'url' => 'https://codeigniter.com/userguide3/general/urls.html'))
 	),
 	'views' => array(
 		'category' => 'FONDASI', 'title' => 'Menyajikan data dengan view', 'duration' => 3,

@@ -21,9 +21,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 | If you need to allow multiple domains, remember that this file is still
 | a PHP script and you can easily do that on your own.
+| CI_BASE_URL may be set in the server environment instead of editing this file.
 |
 */
-$config['base_url'] = '';
+$config['base_url'] = getenv('CI_BASE_URL') ?: '';
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +36,7 @@ $config['base_url'] = '';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
