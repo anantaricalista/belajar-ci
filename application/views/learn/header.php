@@ -18,7 +18,7 @@
 		<nav aria-label="Navigasi utama">
 			<a href="<?= html_escape(learn_site_url()) ?>#kurikulum">Kurikulum</a>
 			<a href="<?= html_escape(learn_site_url()) ?>#cara-belajar">Cara belajar</a>
-			<a class="nav-cta" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>">Mulai belajar <span aria-hidden="true">↗</span></a>
+			<a class="nav-cta" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>" data-start-learning data-complete-url="<?= html_escape(learn_site_url()) ?>#kurikulum">Mulai belajar <span aria-hidden="true">↗</span></a>
 		</nav>
 	</div>
 </header>

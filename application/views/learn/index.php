@@ -11,7 +11,7 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 				<h1>Belajar lebih terarah.<br><em>Bangun lebih percaya diri.</em></h1>
 				<p>Dari konsep dasar sampai aplikasi siap dijalankan. Pelajari CodeIgniter 3 selangkah demi selangkah lewat satu proyek nyata.</p>
 				<div class="hero-actions">
-					<a class="button button-dark" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>">Mulai perjalanan <span aria-hidden="true">↗</span></a>
+					<a class="button button-dark" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>" data-start-learning data-complete-url="<?= html_escape(learn_site_url()) ?>#kurikulum">Mulai perjalanan <span aria-hidden="true">↗</span></a>
 					<a class="text-link" href="#kurikulum">Lihat kurikulum <span aria-hidden="true">↓</span></a>
 				</div>
 				<div class="hero-meta"><span><b><?= count($modules) ?></b> modul terarah</span><span><b>±65</b> jam belajar</span><span><b>1</b> proyek nyata</span></div>
@@ -56,6 +56,6 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 			<p class="progress-note" data-storage-note>Progres disimpan di browser perangkat ini, bukan di akun.</p>
 		</div>
 	</section>
-	<section class="section final-section"><div><div class="eyebrow">SELANGKAH DEMI SELANGKAH</div><h2>Siap membuat<br><em>sesuatu yang nyata?</em></h2><p>Tidak perlu tahu semuanya hari ini. Mulai dari langkah pertama.</p><a class="button button-light" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>">Mulai belajar sekarang <span aria-hidden="true">↗</span></a></div><div class="final-art" aria-hidden="true">✳</div></section>
+	<section class="section final-section"><div><div class="eyebrow">SELANGKAH DEMI SELANGKAH</div><h2>Siap membuat<br><em>sesuatu yang nyata?</em></h2><p>Tidak perlu tahu semuanya hari ini. Mulai dari langkah pertama.</p><a class="button button-light" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>" data-start-learning data-complete-url="<?= html_escape(learn_site_url()) ?>#kurikulum">Mulai belajar sekarang <span aria-hidden="true">↗</span></a></div><div class="final-art" aria-hidden="true">✳</div></section>
 </main>
 <?php $this->load->view('learn/footer'); ?>

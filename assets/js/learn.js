@@ -40,6 +40,17 @@
 			link.classList.toggle('is-complete', done);
 			link.querySelector('[data-sidebar-status]').textContent = done ? ' (selesai)' : '';
 		});
+		var modules = rows.length ? rows : document.querySelectorAll('[data-sidebar-slug]');
+		var nextModule = null;
+		modules.forEach(function (module) {
+			var slug = module.getAttribute('data-module-slug') || module.getAttribute('data-sidebar-slug');
+			if (!nextModule && completed.indexOf(slug) === -1) nextModule = module;
+		});
+		document.querySelectorAll('[data-start-learning]').forEach(function (link) {
+			if (storageAvailable && modules.length) {
+				link.href = nextModule ? nextModule.href : link.getAttribute('data-complete-url');
+			}
+		});
 		var summary = document.querySelector('[data-progress-summary]');
 		var bar = document.querySelector('[data-progress-bar]');
 		if (summary) summary.textContent = count + ' dari ' + rows.length + ' selesai';
