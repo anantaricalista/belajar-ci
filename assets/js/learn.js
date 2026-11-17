@@ -12,17 +12,22 @@
 		notes.forEach(function (note) { note.textContent = message; });
 	}
 
-	try {
-		var saved = localStorage.getItem(key);
-		var parsed = saved === null ? [] : JSON.parse(saved);
-		if (!Array.isArray(parsed) || !parsed.every(function (item) { return typeof item === 'string'; })) {
-			throw new Error('Data progres tidak valid');
+	function loadProgress() {
+		try {
+			var saved = localStorage.getItem(key);
+			var parsed = saved === null ? [] : JSON.parse(saved);
+			if (!Array.isArray(parsed) || !parsed.every(function (item) { return typeof item === 'string'; })) {
+				throw new Error('Data progres tidak valid');
+			}
+			completed = parsed;
+			storageAvailable = true;
+		} catch (error) {
+			storageAvailable = false;
+			notify('Progres tidak tersedia di browser ini. Periksa pengaturan penyimpanan browser.');
 		}
-		completed = parsed;
-	} catch (error) {
-		storageAvailable = false;
-		notify('Progres tidak tersedia di browser ini. Periksa pengaturan penyimpanan browser.');
 	}
+
+	loadProgress();
 
 	function render() {
 		var rows = document.querySelectorAll('[data-module-slug]');
@@ -65,6 +70,11 @@
 
 	if (button && page) {
 		button.addEventListener('click', function () {
+			loadProgress();
+			if (!storageAvailable) {
+				render();
+				return;
+			}
 			var slug = page.getAttribute('data-current-module');
 			var next = completed.slice();
 			var index = next.indexOf(slug);
@@ -80,6 +90,29 @@
 			render();
 		});
 	}
+
+	document.querySelectorAll('[data-start-learning]').forEach(function (link) {
+		link.addEventListener('click', function (event) {
+			loadProgress();
+			if (!storageAvailable) {
+				event.preventDefault();
+				window.alert('Progres tidak tersedia. Periksa pengaturan penyimpanan browser.');
+				return;
+			}
+			render();
+		});
+	});
+
+	window.addEventListener('pageshow', function () {
+		loadProgress();
+		render();
+	});
+	window.addEventListener('storage', function (event) {
+		if (event.key === key || event.key === null) {
+			loadProgress();
+			render();
+		}
+	});
 
 	render();
 }());

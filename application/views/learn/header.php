@@ -4,10 +4,10 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Belajar CodeIgniter 3 melalui modul berurutan dan proyek artikel.">
+	<meta name="description" content="Belajar CodeIgniter 3 melalui modul berurutan dan proyek data siswa.">
 	<title><?= html_escape($page_title) ?> | Ruang CI</title>
-	<link rel="stylesheet" href="<?= html_escape(learn_asset_url('assets/css/learn.css')) ?>">
-	<script src="<?= html_escape(learn_asset_url('assets/js/learn.js')) ?>" defer></script>
+	<link rel="stylesheet" href="<?= html_escape(learn_asset_url('assets/css/learn.css')) ?>?v=<?= filemtime(FCPATH.'assets/css/learn.css') ?>">
+	<script src="<?= html_escape(learn_asset_url('assets/js/learn.js')) ?>?v=<?= filemtime(FCPATH.'assets/js/learn.js') ?>" defer></script>
 </head>
 <body>
 <header class="topbar">
