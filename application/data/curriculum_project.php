@@ -197,8 +197,8 @@ CODE
 , 'explanations' => array('active_group memilih konfigurasi koneksi default dan query_builder mengaktifkan Query Builder CI3.', 'hostname, username, password, dan database harus cocok dengan layanan MySQL XAMPP.', 'mysqli menghubungkan CI3 melalui ekstensi MySQLi PHP; aktifkan ekstensi tersebut jika driver tidak ditemukan.', 'db_debug membantu menemukan kesalahan lokal, tetapi detail error tidak boleh dikirim ke pengguna produksi.', 'utf8mb4 menjaga teks beragam karakter, termasuk nama dan tanda baca.')
 			),
 			array(
-				'title' => '4. Atur route URL siswa',
-				'paragraphs' => array('Buat .htaccess di root proyek terlebih dahulu dengan kode berikut. Aktifkan mod_rewrite dan AllowOverride FileInfo atau All di Apache XAMPP, lalu restart Apache. File ini meneruskan URL bersih ke index.php tanpa mengganggu file dan folder yang ada.'),
+				'title' => '4. Buat dan konfigurasikan .htaccess',
+				'paragraphs' => array('Buat file bernama tepat .htaccess di root proyek, sejajar dengan index.php dan folder application; pastikan bukan .htaccess.txt. Jika file sudah ada, pertahankan konfigurasi lain yang masih diperlukan. Salin aturan berikut untuk meneruskan URL bersih ke index.php tanpa mengganggu file dan folder yang ada.', 'Di XAMPP, aktifkan mod_rewrite dan izinkan AllowOverride FileInfo atau All untuk folder htdocs, lalu restart Apache. Modul Routing & controller menjelaskan langkah pemeriksaan dan penanganan error secara lebih rinci.'),
 				'file' => 'C:\\xampp\\htdocs\\crud-siswa\\.htaccess',
 				'code' => <<<'CODE'
 <IfModule mod_rewrite.c>
@@ -208,7 +208,7 @@ CODE
     RewriteRule ^ index.php [L]
 </IfModule>
 CODE
-				, 'explanations' => array('RewriteEngine mengaktifkan penulisan ulang URL Apache.', 'Kondisi !-f dan !-d melewatkan file serta direktori yang sudah ada.', 'Request lainnya diteruskan ke index.php tanpa menampilkannya pada URL.')
+				, 'explanations' => array('IfModule menjalankan aturan hanya saat mod_rewrite tersedia.', 'RewriteEngine mengaktifkan penulisan ulang URL Apache.', 'Kondisi !-f dan !-d melewatkan file serta direktori yang sudah ada.', 'RewriteRule meneruskan request lainnya ke index.php tanpa menampilkannya pada URL; [L] menghentikan aturan rewrite berikutnya pada putaran itu.', '</IfModule> menutup kelompok aturan.')
 			),
 			array(
 				'title' => '4.1. Atur route URL siswa',
