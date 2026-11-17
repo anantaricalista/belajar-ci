@@ -35,6 +35,11 @@
 			indicator.setAttribute('aria-label', done ? 'Ditandai selesai' : 'Belum ditandai selesai');
 			if (done) count++;
 		});
+		document.querySelectorAll('[data-sidebar-slug]').forEach(function (link) {
+			var done = completed.indexOf(link.getAttribute('data-sidebar-slug')) !== -1;
+			link.classList.toggle('is-complete', done);
+			link.querySelector('[data-sidebar-status]').textContent = done ? ' (selesai)' : '';
+		});
 		var summary = document.querySelector('[data-progress-summary]');
 		var bar = document.querySelector('[data-progress-bar]');
 		if (summary) summary.textContent = count + ' dari ' + rows.length + ' selesai';

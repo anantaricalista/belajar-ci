@@ -10,7 +10,7 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 			<aside class="lesson-sidebar" aria-label="Daftar modul">
 				<div class="sidebar-title">JALUR BELAJAR <span><?= $total ?> MODUL</span></div>
 				<?php $i = 0; foreach ($modules as $item_slug => $item): ?>
-					<a class="sidebar-link<?= $item_slug === $slug ? ' active' : '' ?>" href="<?= html_escape(learn_site_url('modul/'.$item_slug)) ?>"<?= $item_slug === $slug ? ' aria-current="page"' : '' ?>><span><?= sprintf('%02d', $i++) ?></span><?= html_escape($item['title']) ?></a>
+					<a class="sidebar-link<?= $item_slug === $slug ? ' active' : '' ?>" href="<?= html_escape(learn_site_url('modul/'.$item_slug)) ?>" data-sidebar-slug="<?= html_escape($item_slug) ?>"<?= $item_slug === $slug ? ' aria-current="page"' : '' ?>><span><?= sprintf('%02d', $i++) ?></span><span class="sidebar-link-title"><?= html_escape($item['title']) ?></span><span class="sidebar-check" aria-hidden="true">✓</span><span class="visually-hidden" data-sidebar-status></span></a>
 				<?php endforeach; ?>
 			</aside>
 			<article class="lesson-content">
