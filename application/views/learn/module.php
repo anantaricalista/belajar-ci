@@ -20,7 +20,12 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 				<section class="lesson-section">
 					<h2><?= html_escape($section['title']) ?></h2>
 					<?php foreach ($section['paragraphs'] as $paragraph): ?><p><?= html_escape($paragraph) ?></p><?php endforeach; ?>
-					<?php if ( ! empty($section['code'])): ?><div class="code-block"><div class="code-label"><span>CONTOH</span><span><?= html_escape($section['file']) ?></span></div><pre><code><?= html_escape($section['code']) ?></code></pre></div><?php endif; ?>
+					<?php if ( ! empty($section['code'])): ?>
+					<div class="code-block"><div class="code-label"><span>CONTOH</span><span><?= html_escape($section['file']) ?></span></div><pre><code><?= html_escape($section['code']) ?></code></pre></div>
+					<?php if ( ! empty($section['explanations'])): ?>
+					<div class="code-explanations"><strong>Penjelasan baris / kelompok kode</strong><ol><?php foreach ($section['explanations'] as $explanation): ?><li><?= html_escape($explanation) ?></li><?php endforeach; ?></ol></div>
+					<?php endif; ?>
+					<?php endif; ?>
 				</section>
 				<?php endforeach; ?>
 				<section class="exercise"><div class="eyebrow">SAATNYA PRAKTIK <span>✳</span></div><h2><?= html_escape($module['exercise']['title']) ?></h2><p><?= html_escape($module['exercise']['intro']) ?></p><ol><?php foreach ($module['exercise']['steps'] as $step): ?><li><?= html_escape($step) ?></li><?php endforeach; ?></ol><div class="done-criteria"><strong>Kriteria selesai</strong><p><?= html_escape($module['exercise']['criteria']) ?></p></div></section>

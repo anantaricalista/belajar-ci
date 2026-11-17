@@ -14,7 +14,7 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 					<a class="button button-dark" href="<?= html_escape(learn_site_url('modul/prasyarat')) ?>">Mulai perjalanan <span aria-hidden="true">↗</span></a>
 					<a class="text-link" href="#kurikulum">Lihat kurikulum <span aria-hidden="true">↓</span></a>
 				</div>
-				<div class="hero-meta"><span><b>12</b> modul terarah</span><span><b>±52</b> jam belajar</span><span><b>1</b> proyek nyata</span></div>
+				<div class="hero-meta"><span><b><?= count($modules) ?></b> modul terarah</span><span><b>±65</b> jam belajar</span><span><b>1</b> proyek nyata</span></div>
 			</div>
 			<div class="hero-visual" aria-hidden="true">
 				<div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
@@ -35,14 +35,14 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 		<div class="section-heading"><div><div class="eyebrow muted">01 / CARA BELAJAR</div><h2>Bukan cuma membaca.<br><em>Benar-benar memahami.</em></h2></div><p>Setiap modul dirancang untuk membantumu memahami alasan di balik kode, lalu menerapkannya sendiri.</p></div>
 		<div class="steps">
 			<article><div class="step-top"><span>01</span><span>↗</span></div><h3>Pahami konsepnya</h3><p>Kenali alur dan peran setiap bagian sebelum mulai menulis kode.</p></article>
-			<article><div class="step-top"><span>02</span><span>⌘</span></div><h3>Bangun bertahap</h3><p>Ikuti contoh dan kembangkan satu aplikasi artikel dari awal.</p></article>
+			<article><div class="step-top"><span>02</span><span>⌘</span></div><h3>Bangun bertahap</h3><p>Ikuti contoh dan kembangkan aplikasi data siswa SMK dari awal.</p></article>
 			<article><div class="step-top"><span>03</span><span>✳</span></div><h3>Uji pemahaman</h3><p>Kerjakan latihan dan evaluasi sebelum melangkah ke materi berikutnya.</p></article>
 		</div>
 	</section>
 	<section class="curriculum-wrap" id="kurikulum">
 		<div class="section">
 			<div class="section-heading curriculum-heading"><div><div class="eyebrow muted">02 / JALUR PEMBELAJARAN</div><h2>Perjalananmu<br><em>dimulai di sini.</em></h2></div><p>Ikuti urutannya, sesuaikan dengan ritmemu, dan rayakan setiap langkah kecil.</p></div>
-			<div class="curriculum-toolbar"><div><span class="small-label">KURIKULUM LENGKAP</span><strong>12 modul <span>/ dari dasar hingga deployment</span></strong></div><div class="progress-summary" data-progress-summary>0 dari 12 selesai</div></div>
+			<div class="curriculum-toolbar"><div><span class="small-label">KURIKULUM LENGKAP</span><strong><?= count($modules) ?> modul <span>/ dari dasar hingga proyek CRUD siswa</span></strong></div><div class="progress-summary" data-progress-summary>0 dari <?= count($modules) ?> selesai</div></div>
 			<div class="progress-track"><span data-progress-bar></span></div>
 			<div class="module-list">
 			<?php $number = 0; foreach ($modules as $slug => $module): ?>
