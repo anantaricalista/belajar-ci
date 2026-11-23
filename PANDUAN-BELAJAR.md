@@ -34,4 +34,6 @@ Mode testing menyembunyikan error dari halaman dan mengurangi pelaporan deprecat
 
 ## Mengikuti modul
 
-Modul terakhir **Urutan file & kode: CRUD data siswa** merangkum urutan database, konfigurasi, model, controller, view, dan JavaScript dalam satu halaman. CDN jQuery, Bootstrap, dan DataTables pada contoh memerlukan internet; untuk kelas offline, unduh aset vendor dan simpan secara lokal. CRUD siswa adalah latihan lokal tanpa autentikasi/otorisasi—jangan gunakan data pribadi atau publikasikan sebelum perlindungan yang dibutuhkan ditambahkan.
+Ikuti modul sesuai urutan sidebar pada satu proyek latihan: routing dan controller, view dengan data sementara, model dan database, form POST dengan validasi, lalu jQuery, Bootstrap dan DataTables untuk CRUD satu halaman. Pada akhir modul yang mengubah MVC, salin versi lengkap setiap file sesuai tahap tersebut, bukan hanya potongan contoh. Tahap modal menggantikan form POST biasa dan halaman detail sebelumnya; ikuti juga perubahan konfigurasi dan route pada tahap itu.
+
+Modul terakhir **Urutan file & kode: CRUD data siswa** merangkum urutan database, konfigurasi, model, controller, view, dan JavaScript dalam satu halaman. Modul jQuery menjelaskan urutan impor dan alternatif offline; CDN memerlukan internet. Modul login menggunakan proyek dan database terpisah untuk mempelajari dashboard admin; contoh itu tidak otomatis melindungi CRUD siswa. CRUD siswa adalah latihan lokal tanpa autentikasi/otorisasi—jangan gunakan data pribadi atau publikasikan sebelum perlindungan yang dibutuhkan ditambahkan.

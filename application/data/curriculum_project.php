@@ -15,8 +15,26 @@ return array(
 		),
 		'sections' => array(
 			array(
+				'title' => 'Persiapan library dan hubungan MVC',
+				'paragraphs' => array('Lanjutkan proyek XAMPP setelah modul form dan database. Pastikan tabel siswa dan data fiktif sudah dibuat. Pahami HTML form dan tabel, JavaScript dasar, HTTP GET/POST serta route, controller, model, view dan helper URL CI3.', 'Potongan pada modul ini menjelaskan konsep, bukan aplikasi yang dapat langsung dijalankan: selector memerlukan elemen view yang sesuai, URL memerlukan route dan controller, dan DataTables server-side memerlukan endpoint JSON serta model. Rakit semua file lengkap pada akhir modul ini sebelum mengerjakan latihan.', 'Di view CI3, letakkan dua link CSS di dalam head: Bootstrap dahulu, lalu integrasi DataTables Bootstrap 5. Menjelang penutup body, setelah elemen halaman, muat jQuery 3.7.1, Bootstrap 5.3.3 bundle, DataTables 1.13.8 core, integrasi Bootstrap 5 DataTables, dan terakhir JavaScript aplikasi, seperti contoh berikut.', 'CDN membutuhkan internet. Untuk offline, ikuti bagian pilihan offline sebelum kode lengkap di bawah. Jangan memuat salinan CDN dan lokal sekaligus.'),
+				'file' => 'View CI3: head dan akhir body (fragmen)',
+				'code' => <<<'CODE'
+<!-- Di dalam <head>, Bootstrap sebelum integrasi DataTables -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+<!-- Di akhir <body>, setelah tabel dan modal -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="<?= html_escape(base_url('assets/js/siswa.js')) ?>"></script>
+CODE
+, 'explanations' => array('Bootstrap CSS menyediakan gaya dasar; CSS integrasi DataTables menyesuaikan tabel dengan Bootstrap 5.', 'jQuery harus dimuat sebelum DataTables core; integrasi DataTables dimuat setelah core.', 'Bootstrap bundle menyediakan JavaScript modal beserta Popper; Bootstrap 5 tidak bergantung pada jQuery.', 'Script aplikasi dimuat terakhir agar jQuery, Bootstrap dan DataTables tersedia. File siswa.js dibuat pada proyek akhir.', 'Helper URL harus dimuat controller sebelum view menggunakan base_url; penempatan fragmen ini tidak menggantikan markup tabel dan modal.')
+			),
+			array(
 				'title' => 'jQuery menghubungkan aksi pengguna dengan halaman',
-				'paragraphs' => array('jQuery memudahkan pemilihan elemen dan penanganan event. Bungkus kode dalam ready handler agar elemen HTML sudah tersedia. Event delegation berguna untuk tombol yang dibuat ulang setiap kali DataTables menggambar ulang tabel.'),
+				'paragraphs' => array('jQuery memudahkan pemilihan elemen dan penanganan event. Bungkus kode dalam ready handler agar elemen HTML sudah tersedia. Event delegation berguna untuk tombol yang dibuat ulang setiap kali DataTables menggambar ulang tabel.', 'Fragmen ini mengandaikan view memiliki #btn-tambah, #form-siswa, #siswaModal, dan #tabel-siswa. Ia hanya mencatat ID edit, belum memuat data atau menyimpan perubahan; implementasi lengkap ada pada proyek akhir.'),
 				'file' => 'Contoh jQuery',
 				'code' => <<<'CODE'
 $(function () {
@@ -37,7 +55,7 @@ CODE
 , 'explanations' => array('$(function () { ... }) menunggu DOM siap sebelum selector dijalankan.', 'Selector #btn-tambah memilih tombol berdasarkan id; on(click, ...) mendaftarkan aksi klik.', 'reset mengosongkan input form agar modal siap untuk mode tambah.', 'Event delegation memasang listener pada tabel yang tetap ada; tombol .btn-edit boleh dibuat ulang oleh DataTables.', 'data(id) membaca ID dari atribut data-id tombol; console.log hanya alat belajar, ganti dengan pemuatan data/edit.')),
 			array(
 				'title' => 'Modal dan AJAX untuk one-page CRUD',
-				'paragraphs' => array('One-page CRUD berarti daftar dan form tambah/edit tampil pada satu halaman. Modal cocok untuk data siswa yang hanya memiliki empat field. Form dikirim ke controller dengan AJAX POST; server tetap wajib memvalidasi setiap nilai. Hapus juga harus POST, bukan GET.', 'Proyek akhir menggunakan Bootstrap 5 untuk modal, jQuery untuk AJAX, dan token CSRF CI3 di dalam form. Ambil token berikutnya dari response server setelah POST berhasil maupun gagal validasi, karena CI3 dapat meregenerasi token.'),
+				'paragraphs' => array('One-page CRUD berarti daftar dan form tambah/edit tampil pada satu halaman. Modal cocok untuk data siswa yang hanya memiliki empat field. Form dikirim ke controller dengan AJAX POST; server tetap wajib memvalidasi setiap nilai. Hapus juga harus POST, bukan GET.', 'Fragmen berikut mengandaikan simpanUrl menunjuk route controller, perbaruiToken adalah fungsi pembaru hidden input, dan tabel adalah instance DataTables; ketiganya harus disediakan aplikasi. Proyek akhir merakit padanannya bersama view, route, controller, dan model.', 'Proyek akhir menggunakan Bootstrap 5 untuk modal, jQuery untuk AJAX, dan token CSRF CI3 di dalam form. Ambil token berikutnya dari response JSON controller setelah POST berhasil maupun gagal validasi, karena CI3 dapat meregenerasi token.'),
 				'file' => 'Pola pengiriman form dengan jQuery',
 				'code' => <<<'CODE'
 $('#form-siswa').on('submit', function (event) {
@@ -56,7 +74,7 @@ CODE
 , 'explanations' => array('event.preventDefault mencegah browser memuat halaman baru saat form dikirim.', 'ajax mengirim request ke endpoint CI3; type POST sesuai operasi tulis.', 'serialize mengirim setiap input bernama, termasuk hidden ID dan token CSRF.', 'dataType json memastikan response diurai sebagai JSON.', 'done dijalankan pada response sukses; token diperbarui dan DataTables memuat ulang data tanpa kembali ke halaman pertama. Tambahkan penanganan fail untuk status validasi 422 dan error server.')),
 			array(
 				'title' => 'Bedakan DataTables client-side dan server-side',
-				'paragraphs' => array('Pada client-side, browser mengunduh semua baris lalu mencari dan mengurutkannya. Pada server-side, DataTables mengirim draw, start, length, search, dan order ke endpoint setiap kali pengguna mencari atau berpindah halaman. Server mengembalikan recordsTotal, recordsFiltered, dan data untuk halaman itu saja.', 'Untuk dataset siswa yang terus bertambah, server-side mengurangi data yang dikirim per request. Ia menambah kompleksitas: model harus menghitung total sebelum pencarian dan total setelah pencarian, membatasi ukuran halaman, serta membatasi kolom sorting ke daftar yang diizinkan.'),
+				'paragraphs' => array('Pada client-side, browser mengunduh semua baris lalu mencari dan mengurutkannya. Pada server-side, DataTables mengirim draw, start, length, search, dan order ke endpoint setiap kali pengguna mencari atau berpindah halaman. Server mengembalikan recordsTotal, recordsFiltered, dan data untuk halaman itu saja.', 'Untuk dataset siswa yang terus bertambah, server-side mengurangi data yang dikirim per request. Controller memeriksa parameter dan memanggil model untuk menghitung total sebelum dan setelah pencarian serta mengambil halaman; ukuran halaman dan kolom sorting harus dibatasi.', 'Fragmen mengandaikan tabel lima kolom di view dan dataUrl menuju route endpoint JSON controller. Kolom aksi belum menghasilkan tombol: render tombol dan handler lengkap tersedia pada proyek akhir.'),
 				'file' => 'Konfigurasi DataTables server-side',
 				'code' => <<<'CODE'
 const tabel = $('#tabel-siswa').DataTable({
@@ -72,7 +90,7 @@ const tabel = $('#tabel-siswa').DataTable({
     ]
 });
 CODE
-, 'explanations' => array('processing menampilkan indikator saat server sedang memproses request.', 'serverSide mengaktifkan protokol pagination, pencarian, dan sorting sisi server.', 'GET hanya membaca data sehingga tidak mengubah state dan tidak membutuhkan token CSRF.', 'Empat kolom data dipetakan ke field JSON yang dikirim server.', 'Kolom tombol tidak dapat diurutkan atau dicari; handler-nya dipasang dengan event delegation.')),
+, 'explanations' => array('processing menampilkan indikator saat server sedang memproses request.', 'serverSide mengaktifkan protokol pagination, pencarian, dan sorting sisi server.', 'GET hanya membaca data sehingga tidak mengubah state dan tidak membutuhkan token CSRF.', 'Empat kolom data dipetakan ke field JSON yang dikirim server.', 'Kolom kelima tidak dapat diurutkan atau dicari; fragmen ini belum merender tombol aksi.')),
 			array(
 				'title' => 'Server mengolah request secara aman',
 				'paragraphs' => array('Jangan memakai nama kolom dari request langsung di order_by. Nomor indeks sorting harus dipetakan ke allowlist field pada kode server dan arah dibatasi ke ASC atau DESC. start dan length juga berasal dari browser: konversikan ke integer, batasi offset non-negatif, dan beri batas maksimum panjang halaman.', 'Model menjalankan query total, query count setelah filter, lalu query untuk halaman yang diminta. Semua nilai pencarian diproses lewat Query Builder; pengurutan memakai nama kolom tetap dari allowlist.'),
@@ -93,7 +111,7 @@ CODE
 		),
 		'exercise' => array(
 			'title' => 'Ukur request DataTables',
-			'intro' => 'Amati perbedaan kerja browser dan server.',
+			'intro' => 'Setelah merakit kode lengkap pada akhir modul ini, amati perbedaan kerja browser dan server.',
 			'steps' => array('Aktifkan serverSide dan processing pada tabel siswa.', 'Gunakan Network tab browser untuk melihat parameter start, length, search, dan order.', 'Cari nama siswa, ubah urutan, pindah halaman, dan periksa struktur JSON response.', 'Uji request dengan length besar serta order column di luar rentang.'),
 			'criteria' => 'Browser hanya menerima baris untuk halaman aktif, total hitung konsisten, ukuran halaman dibatasi server, dan input sorting tidak dapat menentukan identifier SQL.'
 		),
@@ -122,11 +140,11 @@ CODE
 		'sections' => array(
 			array(
 				'title' => 'Sebelum mulai: nyalakan XAMPP',
-				'paragraphs' => array('Di XAMPP Control Panel, jalankan Apache dan MySQL. Ekstrak salinan CodeIgniter 3.1.13 ke C:\\xampp\\htdocs\\crud-siswa. Buka http://localhost/phpmyadmin/ untuk database dan http://localhost/crud-siswa/ untuk aplikasi. Pastikan PHP pada instalasi XAMPP sesuai dengan versi yang sudah diuji terhadap CI3.', 'Kode di halaman ini membentuk aplikasi latihan satu halaman. Buat setiap file pada salinan proyek CI3, bukan di repository panduan. Isi database hanya dengan data fiktif; proyek contoh ini belum memiliki login dan tidak boleh digunakan untuk data pribadi siswa.')
+				'paragraphs' => array('Prasyarat: pahami HTML form dan tabel, JavaScript dasar, HTTP, serta alur route, controller, model, view, dan helper URL CI3. Pelajari modul jQuery & DataTables untuk konsep dan urutan library; fragmen di sana bukan aplikasi lengkap.', 'Di XAMPP Control Panel, jalankan Apache dan MySQL. Ekstrak salinan CodeIgniter 3.1.13 ke C:\\xampp\\htdocs\\crud-siswa. Buka http://localhost/phpmyadmin/ untuk database dan http://localhost/crud-siswa/ untuk aplikasi. Pastikan PHP pada instalasi XAMPP sesuai dengan versi yang sudah diuji terhadap CI3.', 'Kode di halaman ini merakit aplikasi latihan satu halaman. Buat setiap file pada salinan proyek CI3, bukan di repository panduan. View menampilkan antarmuka; JavaScript memanggil route endpoint controller, yang memvalidasi request dan memakai model untuk database. Isi database hanya dengan data fiktif; proyek contoh ini belum memiliki login dan tidak boleh digunakan untuk data pribadi siswa.')
 			),
 			array(
-				'title' => '1. Buat database dan tabel siswa',
-				'paragraphs' => array('Di phpMyAdmin, pilih tab SQL lalu jalankan seluruh skrip. NIS dibuat unik; ID internal digunakan untuk operasi CRUD. Tiga record contoh di bawah ini bukan data orang sungguhan.'),
+				'title' => '1. Siapkan database dan tabel siswa',
+				'paragraphs' => array('Di phpMyAdmin, periksa dahulu apakah db_siswa dan tabel siswa dari modul Database & model sudah ada. Jika keduanya ada dengan struktur seperti di bawah, gunakan data fiktif yang sudah dibuat: jangan jalankan ulang CREATE DATABASE, CREATE TABLE, atau INSERT contoh karena NIS harus unik.', 'Untuk instalasi kosong tanpa db_siswa, pilih tab SQL dan jalankan seluruh skrip sekali. Jika database ada tetapi tabel siswa belum ada, pilih db_siswa lalu jalankan hanya CREATE TABLE dan, bila diperlukan, INSERT contoh sekali. Tiga record contoh bukan data orang sungguhan.', 'Jika tabel yang sudah ada berbeda strukturnya, jangan hapus atau ubah data sembarangan. Gunakan database latihan kosong dengan nama lain, sesuaikan nama database pada skrip dan konfigurasi tahap 3, lalu jalankan skrip sekali. Jangan gunakan DROP atau mengosongkan tabel untuk memulai proyek.'),
 				'file' => 'phpMyAdmin → SQL',
 				'code' => <<<'CODE'
 CREATE DATABASE db_siswa
@@ -150,7 +168,7 @@ INSERT INTO siswa (nis, nama, kelas, jenis_kelamin) VALUES
 ('RPL002', 'Bima Contoh', 'X RPL 1', 'L'),
 ('RPL003', 'Citra Contoh', 'XI RPL 2', 'P');
 CODE
-, 'explanations' => array('CREATE DATABASE membuat db_siswa dengan encoding utf8mb4 agar berbagai karakter dapat disimpan.', 'id adalah primary key otomatis; NIS adalah identitas sekolah yang wajib dan unik.', 'nama dan kelas dibatasi panjangnya agar sesuai validasi form dan ukuran kolom.', 'ENUM menjaga jenis_kelamin hanya berisi L atau P; sesuaikan dengan aturan data latihan.', 'INSERT menambahkan record fiktif untuk memeriksa tabel, pencarian, dan pagination.')
+, 'explanations' => array('CREATE DATABASE hanya diperlukan jika database latihan belum ada; utf8mb4 mendukung beragam karakter.', 'USE memilih database untuk perintah berikutnya; pilih database yang sesuai bila memakai nama lain.', 'CREATE TABLE hanya diperlukan jika tabel siswa belum ada. id adalah primary key otomatis; NIS wajib dan unik.', 'nama dan kelas dibatasi panjangnya agar sesuai validasi form dan ukuran kolom.', 'ENUM menjaga jenis_kelamin hanya berisi L atau P; sesuaikan dengan aturan data latihan.', 'INSERT menambahkan record fiktif untuk pengujian pada tabel baru; jangan ulangi jika record contoh sudah ada.')
 			),
 			array(
 				'title' => '2. Konfigurasikan URL dan perlindungan CSRF',
@@ -212,7 +230,7 @@ CODE
 			),
 			array(
 				'title' => '4.1. Atur route URL siswa',
-				'paragraphs' => array('Tambahkan route khusus pada application/config/routes.php. Letakkan route endpoint sebelum pola yang lebih umum jika nanti menambahkan pola ID siswa. Route ini membuat aplikasi mempunyai satu halaman dan endpoint JSON terpisah untuk DataTables, simpan, dan hapus.'),
+				'paragraphs' => array('Pada application/config/routes.php, ganti route siswa yang sudah ada dengan daftar berikut dan ganti nilai default_controller yang lama; jangan membuat definisi duplikat.', 'Hapus route tahap awal siswa/(:num) yang mengarah ke siswa/detail/$1 karena controller proyek pada tahap 6 tidak lagi memiliki method detail. Proyek menggunakan satu halaman dan endpoint JSON terpisah untuk DataTables, simpan, dan hapus. Jika kemudian menambahkan pola ID baru, letakkan route endpoint sebelum pola yang lebih umum.'),
 				'file' => 'application/config/routes.php (ganti default route, tambahkan endpoint)',
 				'code' => <<<'CODE'
 $route['siswa'] = 'siswa/index';
@@ -370,13 +388,13 @@ class Siswa extends CI_Controller
 
         $this->load->library('form_validation');
         $this->form_validation->set_rules(
-            'nis', 'NIS', 'trim|required|max_length[20]'
+            'nis', 'NIS', 'required|regex_match[/\S/]|trim|max_length[20]'
         );
         $this->form_validation->set_rules(
-            'nama', 'Nama siswa', 'trim|required|max_length[100]'
+            'nama', 'Nama siswa', 'required|regex_match[/\S/]|trim|max_length[100]'
         );
         $this->form_validation->set_rules(
-            'kelas', 'Kelas', 'trim|required|max_length[30]'
+            'kelas', 'Kelas', 'required|regex_match[/\S/]|trim|max_length[30]'
         );
         $this->form_validation->set_rules(
             'jenis_kelamin', 'Jenis kelamin', 'required|in_list[L,P]'
@@ -471,7 +489,7 @@ CODE
 			),
 			array(
 				'title' => '7. Buat view satu halaman dengan modal',
-				'paragraphs' => array('Buat application/views/siswa/index.php. View ini berisi tabel, hidden input CSRF, dan satu modal yang dipakai untuk tambah maupun edit. CDN di bawah memerlukan koneksi internet; untuk kelas tanpa internet unduh aset vendor dan sajikan dari folder assets lokal.')
+				'paragraphs' => array('Buat application/views/siswa/index.php. View ini berisi tabel, hidden input CSRF, dan satu modal yang dipakai untuk tambah maupun edit. Controller index memuat view dan memberikan URL route serta token; view tidak mengakses model atau database secara langsung.', 'Di head, muat CSS Bootstrap 5.3.3 lebih dahulu, lalu CSS integrasi DataTables 1.13.8 untuk Bootstrap 5. Setelah markup dan konfigurasi URL, menjelang penutup body, muat jQuery 3.7.1, Bootstrap 5.3.3 bundle, DataTables 1.13.8 core, integrasi Bootstrap 5, lalu assets/js/siswa.js yang dibuat pada tahap berikutnya. CDN memerlukan internet; pilihan offline dijelaskan setelah view.')
 				,'file' => 'application/views/siswa/index.php',
 				'code' => <<<'CODE'
 <!doctype html>
@@ -558,7 +576,25 @@ window.siswaConfig = <?= json_encode(array(
 </body>
 </html>
 CODE
-, 'explanations' => array('Bootstrap dan DataTables CSS mengatur tampilan modal dan tabel; CDN membutuhkan internet.', 'Tabel menyediakan lima kolom yang urutannya harus cocok dengan konfigurasi DataTables.', 'Tombol close dan data-bs-dismiss mengendalikan modal Bootstrap 5.', 'ID tersembunyi membedakan create dari update; token CSRF dikirim pada setiap POST.', 'Setiap input mempunyai name sesuai nama field yang divalidasi controller.', 'invalid-feedback menyediakan tempat bagi pesan validasi yang ditambahkan JavaScript.', 'json_encode meneruskan URL endpoint sebagai konfigurasi JavaScript; JSON_HEX_* mencegah karakter HTML menutup elemen script.', 'Urutan script penting: jQuery dimuat sebelum Bootstrap, DataTables, lalu kode aplikasi.', 'base_url assets mengarah ke file JavaScript lokal proyek.')
+, 'explanations' => array('Bootstrap CSS dimuat sebelum CSS integrasi DataTables Bootstrap 5; keduanya mengatur tampilan modal dan tabel.', 'Tabel menyediakan lima kolom yang urutannya harus cocok dengan konfigurasi DataTables.', 'Tombol close dan data-bs-dismiss mengendalikan modal Bootstrap 5.', 'ID tersembunyi membedakan create dari update; token CSRF dikirim pada setiap POST.', 'Setiap input mempunyai name sesuai nama field yang divalidasi controller.', 'invalid-feedback menyediakan tempat bagi pesan validasi yang ditambahkan JavaScript.', 'json_encode meneruskan URL route endpoint dari controller sebagai konfigurasi JavaScript; JSON_HEX_* mencegah karakter HTML menutup elemen script.', 'jQuery harus mendahului DataTables core, lalu integrasi Bootstrap DataTables; Bootstrap bundle menyediakan modal dan Popper tanpa bergantung pada jQuery.', 'Script aplikasi dimuat terakhir melalui base_url setelah seluruh library dan konfigurasi tersedia.')
+			),
+			array(
+				'title' => '7.1. Pilihan offline: simpan library di proyek',
+				'paragraphs' => array('Dengan koneksi internet, unduh keenam file langsung dari URL CDN pada view di atas. Buat folder assets/vendor di root proyek, sejajar dengan application dan index.php. Simpan setiap file dengan nama aslinya sesuai pasangan URL dan lokasi berikut; struktur ini sengaja dibuat untuk unduhan per file, bukan asumsi isi arsip unduhan.', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css → assets/vendor/bootstrap-5.3.3/css/bootstrap.min.css; https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css → assets/vendor/datatables-1.13.8/css/dataTables.bootstrap5.min.css.', 'https://code.jquery.com/jquery-3.7.1.min.js → assets/vendor/jquery-3.7.1/jquery-3.7.1.min.js; https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js → assets/vendor/bootstrap-5.3.3/js/bootstrap.bundle.min.js; https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js → assets/vendor/datatables-1.13.8/js/jquery.dataTables.min.js; https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js → assets/vendor/datatables-1.13.8/js/dataTables.bootstrap5.min.js.', 'Pada view tahap 7, ganti kedua link CDN di head dan keempat script CDN di akhir body dengan fragmen lokal berikut; pertahankan konfigurasi window.siswaConfig sebelum script dan script siswa.js terakhir. Jangan menambahkan keduanya sekaligus. Pastikan base_url di tahap 2 sesuai alamat aplikasi dan helper URL dimuat oleh controller.'),
+				'file' => 'application/views/siswa/index.php (pengganti URL CDN)',
+				'code' => <<<'CODE'
+<!-- Di dalam <head> -->
+<link href="<?= html_escape(base_url('assets/vendor/bootstrap-5.3.3/css/bootstrap.min.css')) ?>" rel="stylesheet">
+<link href="<?= html_escape(base_url('assets/vendor/datatables-1.13.8/css/dataTables.bootstrap5.min.css')) ?>" rel="stylesheet">
+
+<!-- Di akhir <body>, setelah window.siswaConfig -->
+<script src="<?= html_escape(base_url('assets/vendor/jquery-3.7.1/jquery-3.7.1.min.js')) ?>"></script>
+<script src="<?= html_escape(base_url('assets/vendor/bootstrap-5.3.3/js/bootstrap.bundle.min.js')) ?>"></script>
+<script src="<?= html_escape(base_url('assets/vendor/datatables-1.13.8/js/jquery.dataTables.min.js')) ?>"></script>
+<script src="<?= html_escape(base_url('assets/vendor/datatables-1.13.8/js/dataTables.bootstrap5.min.js')) ?>"></script>
+<script src="<?= html_escape(base_url('assets/js/siswa.js')) ?>"></script>
+CODE
+, 'explanations' => array('Kedua stylesheet lokal tetap mengikuti urutan Bootstrap lalu integrasi DataTables.', 'Empat script vendor lokal mempertahankan urutan contoh CDN; bundle sudah mencakup Popper.', 'Script aplikasi tetap berasal dari assets/js/siswa.js dan dibuat pada tahap 8; jangan menggandakan tag yang sudah ada.', 'base_url menghasilkan URL melalui Apache, bukan path disk; periksa Network browser bila ada file yang tidak ditemukan. Mode offline tetap membutuhkan Apache dan MySQL lokal.')
 			),
 			array(
 				'title' => '8. Buat jQuery, modal, AJAX, dan DataTables',
@@ -692,14 +728,14 @@ $(function () {
     });
 });
 CODE
-, 'explanations' => array('Ready handler berjalan setelah DOM siap; config berasal dari URL yang disiapkan controller.', 'Bootstrap Modal mengendalikan satu modal yang dipakai bersama untuk tambah dan edit.', 'updateToken mengganti nama dan nilai hidden input setelah token CSRF diregenerasi server.', 'text() menampilkan pesan sebagai teks sehingga nilai siswa/error tidak ditafsirkan sebagai markup HTML.', 'showErrors menghapus keadaan validasi lama lalu menambahkan pesan baru ke field yang cocok.', 'DataTables meminta data via GET; serverSide mengirim pagination, pencarian, dan sorting ke model.', 'render.text meng-escape field siswa sebelum ditampilkan. Tombol aksi memakai ID numerik, bukan teks bebas dari database.', 'btn-tambah mereset form dan membuka modal dalam mode create.', 'Delegated btn-edit mencari row aktif dan mengisi form modal dari data baris terpilih.', 'serialize mengirim hidden ID serta CSRF dan seluruh nilai form melalui POST.', 'done hanya menampilkan sukses setelah server berhasil; tabel dimuat ulang tanpa mengubah halaman aktif.', 'fail menangani status 422 dengan error per field dan memperbarui token bila response JSON menyediakannya.', 'Hapus menggunakan dialog konfirmasi untuk UX; keamanan sebenarnya tetap berasal dari POST, CSRF, dan validasi controller.', 'tokenData memasukkan CSRF ke payload hapus. Request DELETE tidak digunakan karena contoh CI3 menerima POST.', 'Setelah hapus berhasil, DataTables mengambil ulang data server tanpa kehilangan halaman saat ini.')
+, 'explanations' => array('Ready handler berjalan setelah DOM siap; config berasal dari URL yang disiapkan controller.', 'Bootstrap Modal mengendalikan satu modal yang dipakai bersama untuk tambah dan edit.', 'updateToken mengganti nama dan nilai hidden input setelah token CSRF diregenerasi server.', 'text() menampilkan pesan sebagai teks sehingga nilai siswa/error tidak ditafsirkan sebagai markup HTML.', 'showErrors menghapus keadaan validasi lama lalu menambahkan pesan baru ke field yang cocok.', 'DataTables mengirim pagination, pencarian, dan sorting via GET ke endpoint controller; controller memanggil model untuk mengambil data.', 'render.text meng-escape field siswa sebelum ditampilkan. Tombol aksi memakai ID numerik, bukan teks bebas dari database.', 'btn-tambah mereset form dan membuka modal dalam mode create.', 'Delegated btn-edit mencari row aktif dan mengisi form modal dari data baris terpilih.', 'serialize mengirim hidden ID serta CSRF dan seluruh nilai form melalui POST.', 'done hanya menampilkan sukses setelah server berhasil; tabel dimuat ulang tanpa mengubah halaman aktif.', 'fail menangani status 422 dengan error per field dan memperbarui token bila response JSON menyediakannya.', 'Hapus menggunakan dialog konfirmasi untuk UX; keamanan sebenarnya tetap berasal dari POST, CSRF, dan validasi controller.', 'tokenData memasukkan CSRF ke payload hapus. Request DELETE tidak digunakan karena contoh CI3 menerima POST.', 'Setelah hapus berhasil, DataTables mengambil ulang data server tanpa kehilangan halaman saat ini.')
 			),
 			array(
 				'title' => '9. Jalankan dan uji CRUD di browser',
-				'paragraphs' => array('Simpan file, pastikan Apache dan MySQL tetap menyala, lalu buka http://localhost/crud-siswa/siswa. CDN Bootstrap, jQuery, dan DataTables memerlukan koneksi internet. Jika ingin belajar tanpa internet, unduh file vendor dan ubah URL script menjadi path lokal.', 'Urutan file yang sudah dibuat: (1) database db_siswa di phpMyAdmin, (2) application/config/config.php dan database.php, (3) .htaccess, (4) application/config/routes.php, (5) application/models/Siswa_model.php, (6) application/controllers/Siswa.php, (7) application/views/siswa/index.php, (8) assets/js/siswa.js. Masing-masing tahap menyiapkan kebutuhan tahap sesudahnya.'),
+				'paragraphs' => array('Simpan file, pastikan Apache dan MySQL tetap menyala, lalu buka http://localhost/crud-siswa/siswa. CDN memerlukan koneksi internet; untuk offline siapkan dan gunakan semua file lokal sesuai tahap 7.1. Periksa Network browser jika aset atau endpoint gagal dimuat.', 'Urutan tahap: (1) database db_siswa, (2) application/config/config.php, (3) application/config/database.php, (4) .htaccess, (4.1) application/config/routes.php, (5) application/models/Siswa_model.php, (6) application/controllers/Siswa.php, (7) application/views/siswa/index.php, (7.1) aset vendor lokal jika offline, (8) assets/js/siswa.js, lalu (9) uji browser. File saling merujuk; jalankan pengujian setelah seluruh tahap yang diperlukan selesai.'),
 				'file' => 'Daftar cek browser',
 				'code' => <<<'CODE'
-1. Muat halaman dan pastikan tiga siswa fiktif tampil.
+1. Muat halaman dan pastikan data siswa fiktif yang tersedia tampil.
 2. Cari NIS/nama dan ubah urutan kolom.
 3. Tambah siswa melalui modal; cek NIS duplikat dan form kosong.
 4. Edit siswa dari tombol pada tabel.
@@ -717,7 +753,7 @@ CODE
 		'exercise' => array(
 			'title' => 'Tuntaskan proyek satu halaman',
 			'intro' => 'Buat seluruh file sesuai urutan di atas dan demonstrasikan CRUD pada XAMPP lokal.',
-			'steps' => array('Jalankan database dan masukkan data contoh fiktif.', 'Ikuti konfigurasi, model, controller, view, dan JavaScript tanpa melompati urutannya.', 'Buktikan pencarian dan pagination terjadi di server.', 'Uji tambah, validasi duplikat, edit, hapus, CSRF, dan request method.', 'Jelaskan peran setiap file kepada teman sekelas tanpa membaca salinan kode.'),
+			'steps' => array('Jalankan database dan gunakan data fiktif yang sudah ada, atau masukkan contoh sekali pada tabel latihan baru.', 'Ikuti konfigurasi, model, controller, view, dan JavaScript tanpa melompati urutannya.', 'Buktikan pencarian dan pagination terjadi di server.', 'Uji tambah, validasi duplikat, edit, hapus, CSRF, dan request method.', 'Jelaskan peran setiap file kepada teman sekelas tanpa membaca salinan kode.'),
 			'criteria' => 'CRUD persisten bekerja di MySQL; daftar tetap satu halaman; browser hanya menerima satu halaman baris; field di-escape; query sorting di-allowlist; write hanya POST dan token CSRF diperbarui.'
 		),
 		'review' => array(

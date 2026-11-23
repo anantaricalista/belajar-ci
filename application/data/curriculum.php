@@ -1,6 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+$form_modules = require APPPATH.'data/curriculum_form.php';
+$login_modules = require APPPATH.'data/curriculum_login.php';
+
 return array(
 	'prasyarat' => array(
 		'category' => 'FONDASI', 'title' => 'Bekal sebelum mulai', 'duration' => 3,
@@ -240,80 +243,35 @@ CODE
 		'review' => array(array('question' => 'Mengapa query ditempatkan di model?', 'answer' => 'Model memusatkan akses data sehingga controller fokus pada alur request dan view pada penyajian.'), array('question' => 'Apa yang harus dilakukan jika row_array() tidak menemukan data?', 'answer' => 'Periksa hasil sebelum mengaksesnya dan kembalikan 404 untuk siswa yang tidak ada.')),
 		'resources' => array(array('title' => 'Model CI3', 'url' => 'https://codeigniter.com/userguide3/general/models.html'), array('title' => 'Query Builder', 'url' => 'https://codeigniter.com/userguide3/database/query_builder.html'))
 	),
-	'form-validasi' => array(
-		'category' => 'MEMBANGUN FITUR', 'title' => 'Form & validasi', 'duration' => 5,
-		'summary' => 'Validasi input siswa dan siapkan form tambah siswa pada aplikasi.',
-		'goals' => array('Membuat form POST dengan form helper.', 'Menggunakan library form validation dan menampilkan kesalahan.', 'Menyimpan data valid melalui model dan redirect setelah berhasil.'),
-		'sections' => array(
-			array('title' => 'Form data siswa', 'paragraphs' => array('Muat helper form dan URL serta library form_validation. form_open membuat form terintegrasi dengan CI3, termasuk token CSRF ketika perlindungan aktif. Di akhir perjalanan proyek, form siswa sederhana akan ditempatkan dalam modal Bootstrap.'), 'file' => 'application/views/siswa/create.php', 'code' => <<<'CODE'
-<?= validation_errors() ?>
-<?= form_open('siswa/create') ?>
-    <label for="nis">NIS</label>
-    <input id="nis" name="nis" value="<?= html_escape(set_value('nis')) ?>">
-    <label for="nama">Nama siswa</label>
-    <input id="nama" name="nama" value="<?= html_escape(set_value('nama')) ?>">
-    <label for="kelas">Kelas</label>
-    <input id="kelas" name="kelas" value="<?= html_escape(set_value('kelas')) ?>">
-    <button type="submit">Simpan</button>
-<?= form_close() ?>
-CODE
-, 'explanations' => array('validation_errors menampilkan kesalahan validasi yang telah disiapkan CI3.', 'form_open membuat form POST ke endpoint siswa/create dan menambahkan token CSRF jika aktif.', 'Setiap input memiliki label dan name yang dipakai server saat menerima POST.', 'set_value mengisi kembali isian setelah validasi gagal; html_escape mengamankan nilai saat dirender.', 'form_close menutup form dan mengakhiri pembentukan markup helper.')),
-			array('title' => 'Validasi di controller', 'paragraphs' => array('Pada endpoint penyimpanan, tentukan aturan sebelum form_validation->run(). Saat validasi gagal, kembalikan kesalahan. Saat valid, kirim hanya field yang diizinkan ke model. Contoh berikut menunjukkan bagian validasi.'), 'file' => 'Bagian dari Siswa::simpan()', 'code' => <<<'CODE'
-$this->form_validation->set_rules('nis', 'NIS', 'trim|required|max_length[20]');
-$this->form_validation->set_rules('nama', 'Nama siswa', 'trim|required|max_length[100]');
-$this->form_validation->set_rules('kelas', 'Kelas', 'trim|required|max_length[30]');
-$this->form_validation->set_rules('jenis_kelamin', 'Jenis kelamin', 'required|in_list[L,P]');
-if ($this->form_validation->run() === FALSE)
-{
-    $errors = $this->form_validation->error_array();
-}
-CODE
-, 'explanations' => array('set_rules menetapkan aturan di server, bukan hanya atribut HTML pada browser.', 'required memastikan kolom diisi; max_length membatasi panjang sesuai tipe kolom database.', 'in_list menerima hanya nilai jenis kelamin yang telah ditentukan.', 'Jika run gagal, kumpulkan kesalahan per field dan kembalikan respons validasi; jangan menulis ke database.', 'error_array menghasilkan pesan untuk ditampilkan di modal sebagai teks, bukan HTML mentah.')),
-			array('title' => 'Validasi bukan escaping', 'paragraphs' => array('Validasi memeriksa apakah input memenuhi aturan bisnis. Escaping dilakukan ketika data disajikan sesuai konteks output. Query Builder atau query bindings melindungi nilai query; jangan menganggap validasi form cukup untuk mencegah SQL injection atau XSS.')),
-			array('title' => 'Validasi seluruh field di sisi server', 'paragraphs' => array('Untuk endpoint AJAX, kembalikan status dan pesan JSON yang jelas. Aturan lengkap serta cara mengirim hasil validasi akan dirangkai pada modul DataTables dan proyek akhir; pengiriman modal tidak melewati pemeriksaan server.'), 'file' => 'Hasil validasi', 'code' => <<<'CODE'
-if ($this->form_validation->run() === FALSE)
-{
-    $this->output->set_status_header(422);
-    $this->output->set_content_type('application/json', 'utf-8')
-        ->set_output(json_encode(array(
-            'ok' => FALSE,
-            'errors' => $this->form_validation->error_array()
-        )));
-    return;
-}
-CODE
-, 'explanations' => array('422 Unprocessable Entity menunjukkan request diterima tetapi isinya tidak memenuhi aturan.', 'JSON hanya berisi status dan pesan per field; tidak menyimpan record jika validasi gagal.', 'return menghentikan method agar kode penyimpanan tidak dijalankan.'))
-		),
-		'exercise' => array('title' => 'Validasi data siswa', 'intro' => 'Buat validasi server untuk form siswa sebelum menyimpan data.', 'steps' => array('Validasi NIS, nama, kelas, dan jenis kelamin.', 'Tolak NIS yang sudah dipakai dan input yang terlalu panjang.', 'Uji form kosong serta payload yang dikirim langsung tanpa browser.'), 'criteria' => 'Server menolak input tidak valid dan hanya menyimpan field siswa yang diizinkan.'),
-		'review' => array(array('question' => 'Mengapa perlu redirect setelah POST sukses?', 'answer' => 'Pola Post/Redirect/Get mengurangi risiko pengiriman ulang ketika halaman hasil diperbarui.'), array('question' => 'Apakah validasi required mencegah XSS?', 'answer' => 'Tidak. Escape data saat output sesuai konteks, sekalipun input telah divalidasi.')),
-		'resources' => array(array('title' => 'Form validation', 'url' => 'https://codeigniter.com/userguide3/libraries/form_validation.html'), array('title' => 'Form helper', 'url' => 'https://codeigniter.com/userguide3/helpers/form_helper.html'))
-	),
+	'form-validasi' => $form_modules['form-validasi'],
 	'crud' => array(
 		'category' => 'MEMBANGUN FITUR', 'title' => 'CRUD lengkap', 'duration' => 6,
 		'summary' => 'Lengkapi alur CRUD siswa dalam satu halaman dengan modal dan AJAX.',
 		'goals' => array('Membuat alur edit dan hapus dengan model.', 'Memeriksa keberadaan siswa dan hasil operasi.', 'Menggunakan POST untuk perubahan dan memperbarui tabel setelah berhasil.'),
 		'sections' => array(
-			array('title' => 'Dari create ke update', 'paragraphs' => array('Edit dimulai dengan mencari siswa berdasarkan ID. Tampilkan nilai siswa di modal yang sama; setelah POST valid, kirim hanya field yang diizinkan ke model. Siswa yang tidak ada harus menghasilkan 404 atau 404 JSON. Di model, Query Builder membatasi perubahan berdasarkan ID.'), 'file' => 'Bagian dari Siswa_model', 'code' => <<<'CODE'
-public function ubah($id, $data)
+			array('title' => 'Dari create ke update', 'paragraphs' => array('Setelah merakit aplikasi lengkap pada akhir modul jQuery & DataTables, pelajari kembali method save dan delete berikut dari model yang sama. Edit memakai modal dan ID; controller memvalidasi input dan memeriksa keberadaan siswa sebelum memanggil model.'), 'file' => 'Bagian dari application/models/Siswa_model.php', 'code' => <<<'CODE'
+public function save($data, $id = 0)
 {
-    return $this->db->where('id', $id)->update('siswa', $data);
+    if ($id > 0)
+    {
+        return $this->db->where('id', $id)->update($this->table, $data);
+    }
+    return $this->db->insert($this->table, $data);
 }
 
-public function hapus($id)
+public function delete($id)
 {
-    return $this->db->where('id', $id)->delete('siswa');
+    return $this->db->where('id', $id)->delete($this->table);
 }
 CODE
-, 'explanations' => array('where membatasi perubahan ke satu siswa berdasarkan ID.', 'update mengubah field yang telah divalidasi pada tabel siswa.', 'delete menghapus satu baris berdasarkan ID; controller harus memastikan baris itu ada dan request memakai POST.')),
+, 'explanations' => array('save menggunakan update untuk ID yang ada dan insert untuk siswa baru.', 'where membatasi perubahan berdasarkan ID; data harus divalidasi oleh controller.', 'delete menghapus berdasarkan ID; controller harus memastikan baris itu ada dan request memakai POST.')),
 			array('title' => 'Hapus secara aman', 'paragraphs' => array('Gunakan POST, bukan GET, untuk menghapus. Periksa method request, token CSRF, keberadaan data, dan hak akses sebelum memanggil model. Konfirmasi di browser boleh membantu pengguna, tetapi bukan pengganti pemeriksaan server.', 'Setelah AJAX berhasil, muat ulang tabel dan tampilkan pesan sukses. Bila gagal, catat kesalahan server dan beri pesan yang tidak membocorkan detail database.')),
-			array('title' => 'Periksa method sebelum mengubah data', 'paragraphs' => array('Potongan berikut menunjukkan gerbang method untuk endpoint hapus siswa. Untuk aplikasi sekolah, autentikasi dan otorisasi juga perlu ditambahkan. Perlindungan CSRF tetap diperiksa oleh CI3 sebelum controller berjalan.'), 'file' => 'Bagian dari Siswa::hapus($id)', 'code' => <<<'CODE'
-if ($this->input->method() !== 'post')
+			array('title' => 'Periksa method sebelum mengubah data', 'paragraphs' => array('Potongan berikut adalah gerbang method pada Siswa::hapus() di aplikasi lengkap. Untuk aplikasi sekolah, autentikasi dan otorisasi juga perlu ditambahkan. Perlindungan CSRF tetap diperiksa oleh CI3 sebelum controller berjalan.'), 'file' => 'Bagian dari Siswa::hapus()', 'code' => <<<'CODE'
+if ($this->input->method(TRUE) !== 'POST')
 {
-    show_error('Method tidak diizinkan', 405);
+    $this->json_response(array('message' => 'Gunakan POST.'), 405);
     return;
 }
-// Periksa identitas, peran, ID dan keberadaan siswa.
-// Panggil model hanya setelah semua pemeriksaan berhasil.
 CODE
 			, 'explanations' => array('method membaca jenis request HTTP.', 'Jika request bukan POST, server mengembalikan 405 dan menghentikan proses.', 'Pemeriksaan otorisasi dan keberadaan siswa harus dilakukan sebelum penghapusan.')),
 			array('title' => 'Batas tahap ini', 'paragraphs' => array('CRUD latihan belum memiliki login dan otorisasi sekolah. Gunakan data buatan di lingkungan lokal saja. Jangan masukkan data pribadi atau NIS siswa sungguhan ke latihan, dan jangan publikasikan pengelolaan tanpa autentikasi.'))
@@ -336,52 +294,14 @@ $query = $this->db->query(
 return $query->result_array();
 CODE
 			, 'explanations' => array('query menjalankan SQL melalui driver CI3.', 'Tanda ? adalah placeholder; nilai NIS dikirim terpisah sebagai parameter, bukan ditempelkan ke string SQL.', 'result_array mengubah hasil query menjadi array untuk diolah aplikasi.')),
-			array('title' => 'CSRF pada form perubahan', 'paragraphs' => array('Aktifkan csrf_protection di application/config/config.php pada proyek latihan. Form POST yang dibuat dengan form_open akan menyertakan token ketika fitur aktif. Uji semua form termasuk edit dan hapus; request tanpa token yang valid harus ditolak. Untuk AJAX atau integrasi lain, kirim token dengan cara yang sesuai dan perhatikan regenerasi token.', 'CSRF tidak menggantikan pemeriksaan login dan hak akses. Pastikan operasi perubahan tidak tersedia melalui GET.'), 'file' => 'application/config/config.php', 'code' => "\$config['csrf_protection'] = TRUE;"),
+			array('title' => 'CSRF pada form perubahan', 'paragraphs' => array('Aktifkan csrf_protection di application/config/config.php pada proyek latihan. Form POST yang dibuat dengan form_open akan menyertakan token ketika fitur aktif. Uji semua form termasuk edit dan hapus; request tanpa token yang valid harus ditolak. Untuk AJAX atau integrasi lain, kirim token dengan cara yang sesuai dan perhatikan regenerasi token.', 'CSRF tidak menggantikan pemeriksaan login dan hak akses. Pastikan operasi perubahan tidak tersedia melalui GET.'), 'file' => 'application/config/config.php', 'code' => "\$config['csrf_protection'] = TRUE;", 'explanations' => array('csrf_protection mengaktifkan pemeriksaan token CI3 untuk request POST; form dan AJAX harus mengirim token yang valid.')),
 			array('title' => 'Password dan rahasia', 'paragraphs' => array('Gunakan password_hash dan password_verify, bukan hash cepat seperti MD5. Simpan hash, bukan password asli; jangan mengubah password dengan trim atau filter yang merusak nilainya. Pada login, gunakan pesan kegagalan umum dan regenerasi session ID setelah autentikasi.', 'Atur base_url eksplisit untuk lingkungan produksi, gunakan HTTPS, batasi akses file konfigurasi dan log, dan simpan kredensial di konfigurasi lingkungan yang tidak dikomit. Jangan tampilkan stack trace atau error database kepada pengunjung.'))
 		),
-		'exercise' => array('title' => 'Uji lapisan perlindungan', 'intro' => 'Tinjau setiap titik masuk dan keluaran aplikasi latihan.', 'steps' => array('Aktifkan CSRF dan uji create, edit, dan hapus menggunakan form helper.', 'Kirim POST tanpa token yang valid dan pastikan server menolaknya.', 'Simpan judul yang mengandung tag HTML dan pastikan tampil sebagai teks; periksa semua query yang menerima input.'), 'criteria' => 'Form valid tetap berfungsi, POST tanpa token ditolak, dan data tidak dijalankan sebagai HTML.'),
+		'exercise' => array('title' => 'Uji lapisan perlindungan', 'intro' => 'Tinjau setiap titik masuk dan keluaran aplikasi latihan satu halaman.', 'steps' => array('Periksa token CSRF pada form modal dan uji tambah, edit, dan hapus melalui AJAX.', 'Kirim POST tanpa token yang valid dan pastikan server menolaknya.', 'Simpan nama siswa fiktif yang mengandung tag HTML dan pastikan tampil sebagai teks; periksa semua query yang menerima input.'), 'criteria' => 'Form valid tetap berfungsi, POST tanpa token ditolak, dan data tidak dijalankan sebagai HTML.'),
 		'review' => array(array('question' => 'Apa perbedaan validasi input dan escaping output?', 'answer' => 'Validasi menegakkan aturan input; escaping menyiapkan data untuk konteks output tertentu. Keduanya memiliki tujuan berbeda.'), array('question' => 'Apakah token CSRF membuktikan pengguna boleh menghapus data siswa?', 'answer' => 'Tidak. Token mengurangi risiko request lintas situs; hak akses harus diperiksa terpisah di server.')),
 		'resources' => array(array('title' => 'Keamanan CI3', 'url' => 'https://codeigniter.com/userguide3/general/security.html'), array('title' => 'Security library dan CSRF', 'url' => 'https://codeigniter.com/userguide3/libraries/security.html'), array('title' => 'PHP password hashing', 'url' => 'https://www.php.net/manual/en/function.password-hash.php'))
 	),
-	'login-otorisasi' => array(
-		'category' => 'APLIKASI AMAN', 'title' => 'Login & otorisasi', 'duration' => 5,
-		'summary' => 'Kelola session dan pastikan hanya pengguna berhak yang mengubah data siswa.',
-		'goals' => array('Membedakan autentikasi dan otorisasi.', 'Memverifikasi password dan mengelola session.', 'Melindungi setiap endpoint pengelolaan di server.'),
-		'sections' => array(
-			array('title' => 'Identitas dan hak akses', 'paragraphs' => array('Autentikasi menjawab siapa pengguna; otorisasi menentukan apa yang boleh ia lakukan. Login saja tidak cukup: semua endpoint create, edit, dan hapus harus memeriksa identitas serta hak akses, termasuk request langsung tanpa melalui menu.', 'Buat tabel pengguna dengan ID unik, username unik, password_hash, dan peran. Sediakan administrator awal melalui proses lokal yang aman, bukan password default yang dikomit atau endpoint publik tanpa perlindungan.')),
-			array('title' => 'Verifikasi dan session', 'paragraphs' => array('Muat session library, cari pengguna berdasarkan username dengan query terparameterisasi, lalu verifikasi hash dengan password_verify. Gunakan pesan kegagalan yang sama untuk username dan password yang salah. Contoh berikut hanya bagian sukses, bukan implementasi login lengkap.'), 'file' => 'Bagian dari proses login', 'code' => <<<'CODE'
-if ($user && password_verify($password, $user['password_hash']))
-{
-    $this->session->sess_regenerate(TRUE);
-    $this->session->set_userdata(array(
-        'user_id' => $user['id'],
-        'role' => $user['role']
-    ));
-    redirect('siswa');
-    return;
-}
-// Tampilkan pesan login gagal yang umum.
-CODE
-			, 'explanations' => array('password_verify mencocokkan password dengan hash tanpa menyimpan password asli.', 'sess_regenerate memperbarui ID session setelah autentikasi.', 'set_userdata menyimpan ID dan peran untuk pemeriksaan akses.', 'redirect mengarahkan pengguna ke daftar siswa setelah login sukses.')),
-			array('title' => 'Lindungi seluruh operasi', 'paragraphs' => array('Periksa user_id dan peran di server sebelum menampilkan maupun memproses form pengelolaan. Tolak akses yang tidak berhak; jangan hanya menyembunyikan tombol. Saat logout, gunakan POST dengan CSRF lalu hapus session. Atur cookie aman dan HTTPS pada produksi.', 'Untuk aplikasi nyata, pertimbangkan pembatasan percobaan login, penguncian yang tidak memudahkan penolakan layanan, serta cara memulihkan akun yang aman.')),
-			array('title' => 'Contoh pemeriksaan akses', 'paragraphs' => array('Muat session library terlebih dahulu. Pemeriksaan berikut adalah bagian awal setiap method pengelolaan data siswa; ekstraksi ke method privat atau class dasar dapat mengurangi duplikasi. Jika hak pengguna dapat berubah saat session masih aktif, ambil hak terbaru dari sumber yang tepercaya.'), 'file' => 'Awal method pengelolaan siswa', 'code' => <<<'CODE'
-if ( ! $this->session->userdata('user_id'))
-{
-    redirect('login');
-    return;
-}
-if ($this->session->userdata('role') !== 'admin')
-{
-    show_error('Akses ditolak', 403);
-    return;
-}
-CODE
-			, 'explanations' => array('Jika user_id tidak ada, pengguna diarahkan ke login.', 'Peran selain admin ditolak dengan HTTP 403.', 'return menghentikan operasi yang tidak diizinkan.'))
-		),
-		'exercise' => array('title' => 'Batasi akses pengelolaan', 'intro' => 'Tambahkan autentikasi ke proyek latihan.', 'steps' => array('Buat pengguna administrator awal dengan password_hash melalui proses lokal aman.', 'Implementasikan login, regenerasi session, dan logout POST.', 'Uji URL create, edit, dan hapus secara langsung tanpa login dan sebagai pengguna tanpa hak.'), 'criteria' => 'Hanya pengguna berhak dapat menjalankan perubahan; login gagal tidak mengungkap apakah username terdaftar.'),
-		'review' => array(array('question' => 'Apa perbedaan autentikasi dan otorisasi?', 'answer' => 'Autentikasi memverifikasi identitas; otorisasi memutuskan tindakan yang diperbolehkan bagi identitas tersebut.'), array('question' => 'Mengapa session ID diregenerasi setelah login?', 'answer' => 'Untuk mengurangi risiko session fixation ketika status pengguna berubah menjadi terautentikasi.')),
-		'resources' => array(array('title' => 'Session CI3', 'url' => 'https://codeigniter.com/userguide3/libraries/sessions.html'), array('title' => 'PHP password_verify', 'url' => 'https://www.php.net/manual/en/function.password-verify.php'))
-	),
+	'login-otorisasi' => $login_modules['login-otorisasi'],
 	'pencarian-debugging' => array(
 		'category' => 'PENDALAMAN', 'title' => 'Pencarian & debugging', 'duration' => 4,
 		'summary' => 'Buat daftar lebih mudah digunakan dan pelajari cara menelusuri masalah.',
