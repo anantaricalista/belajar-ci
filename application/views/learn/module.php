@@ -22,9 +22,6 @@ $this->load->view('learn/header', array('page_title' => $page_title));
 					<?php foreach ($section['paragraphs'] as $paragraph): ?><p><?= html_escape($paragraph) ?></p><?php endforeach; ?>
 					<?php if ( ! empty($section['code'])): ?>
 					<div class="code-block"><div class="code-label"><span>CONTOH</span><span><?= html_escape($section['file']) ?></span></div><pre><code><?= html_escape($section['code']) ?></code></pre></div>
-					<?php if ( ! empty($section['explanations'])): ?>
-					<div class="code-explanations"><strong>Penjelasan baris / kelompok kode</strong><ol><?php foreach ($section['explanations'] as $explanation): ?><li><?= html_escape($explanation) ?></li><?php endforeach; ?></ol></div>
-					<?php endif; ?>
 					<?php endif; ?>
 				</section>
 				<?php endforeach; ?>

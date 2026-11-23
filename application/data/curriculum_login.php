@@ -29,25 +29,26 @@ return array(
 				),
 				'file' => 'SQL — jalankan pada database login_demo',
 				'code' => <<<'CODE'
+-- Buat tabel akun latihan; jalankan pada database login_demo.
 CREATE TABLE pengguna (
+    -- ID unik; username juga unik dan peka huruf besar/kecil.
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     username VARCHAR(50) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    -- Ruang hash memungkinkan perubahan algoritma; ENUM membatasi peran.
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
     PRIMARY KEY (id),
     UNIQUE KEY pengguna_username_unique (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CODE
-				, 'explanations' => array(
-					'id adalah identitas unik; username unik dan peka huruf besar/kecil.',
-					'password_hash menyediakan ruang untuk perubahan algoritma; role membatasi nilai peran.'
-				)
 			),
 			array(
 				'title' => 'Konfigurasikan koneksi database login',
 				'paragraphs' => array('Di application/config/database.php proyek login-demo, ubah nilai di dalam array $db[default] yang sudah ada. Contoh berikut hanya untuk XAMPP lokal; sesuaikan akun dan password jika berbeda. Pastikan ekstensi mysqli aktif.'),
 				'file' => 'application/config/database.php — nilai $db[default]',
 				'code' => <<<'CODE'
+// Ganti nilai pada array yang sudah ada, bukan menambahkan array baru.
+// Sesuaikan koneksi MySQL lokal; db_debug FALSE mencegah detail query ditampilkan.
 'hostname' => 'localhost',
 'username' => 'root',
 'password' => '',
@@ -55,7 +56,6 @@ CODE
 'dbdriver' => 'mysqli',
 'db_debug' => FALSE,
 CODE
-				, 'explanations' => array('Ganti nilai pada array yang sudah ada, bukan menambahkan array baru.', 'hostname, username, password dan database harus sesuai MySQL lokal; db_debug FALSE mencegah detail query ditampilkan.')
 			),
 			array(
 				'title' => 'Buat akun dummy hanya di komputer lokal',
@@ -66,12 +66,10 @@ CODE
 				),
 				'file' => 'Terminal lokal — contoh dummy, bukan produksi',
 				'code' => <<<'CODE'
+# Hanya untuk latihan lokal: password_hash membuat hash dengan salt acak.
+# Masukkan hanya hash hasilnya ke database; password_verify akan memverifikasinya.
 php -r 'echo password_hash("LatihanDummy123!", PASSWORD_DEFAULT), PHP_EOL;'
 CODE
-				, 'explanations' => array(
-					'password_hash menghasilkan hash dengan salt acak; password_verify nanti memverifikasinya.',
-					'Hanya hash hasilnya yang dimasukkan ke database lokal. Perintah ini sengaja memakai sandi dummy yang tidak rahasia.'
-				)
 			),
 			array(
 				'title' => 'Konfigurasi dan route',
@@ -82,35 +80,32 @@ CODE
 				),
 				'file' => 'application/config/config.php — baris yang disesuaikan',
 				'code' => <<<'CODE'
+// Sesuaikan URL dan index_page dengan pemasangan lokal dan konfigurasi server.
 $config['base_url'] = 'http://localhost/login-demo/';
 $config['index_page'] = '';
+// Aktifkan CSRF dan regenerasi token; form helper menyisipkan token pada POST lokal.
 $config['csrf_protection'] = TRUE;
 $config['csrf_regenerate'] = TRUE;
 $config['csrf_exclude_uris'] = array();
+// Cookie membantu mengurangi risiko pencurian dan pengiriman lintas situs;
+// HTTPS tetap diperlukan di produksi.
 $config['cookie_httponly'] = TRUE;
 $config['cookie_samesite'] = 'Lax';
 $config['sess_samesite'] = 'Lax';
 $config['cookie_secure'] = FALSE; // TRUE jika seluruh aplikasi memakai HTTPS
 CODE
-				, 'explanations' => array(
-					'base_url dan index_page harus sesuai pemasangan lokal dan konfigurasi server.',
-					'CSRF aktif dan token diregenerasi; form helper menyisipkan token untuk form POST lokal.',
-					'Pengaturan cookie mengurangi risiko pencurian dan pengiriman lintas situs; HTTPS tetap diperlukan di produksi.'
-				)
 			),
 			array(
 				'title' => 'Tambahkan route contoh',
 				'paragraphs' => array('Tempatkan route sebelum route yang lebih umum agar tidak tertangkap lebih dahulu. Ketiganya menunjuk controller yang sama.'),
 				'file' => 'application/config/routes.php — tambahkan',
 				'code' => <<<'CODE'
+// Login menampilkan dan memproses form; dashboard memeriksa session dan peran.
 $route['login'] = 'auth/login';
 $route['dashboard'] = 'auth/dashboard';
+// Logout hanya menerima POST di controller; route tidak membatasi metode HTTP.
 $route['logout'] = 'auth/logout';
 CODE
-				, 'explanations' => array(
-					'login menampilkan dan memproses form; dashboard memeriksa session dan peran.',
-					'logout menerima hanya POST; route sendiri tidak membatasi metode HTTP.'
-				)
 			),
 			array(
 				'title' => 'Alur, error, dan pengujian',
@@ -132,6 +127,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Auth extends CI_Controller
 {
+    // Muat helper dan library yang dibutuhkan; no-store membatasi cache respons.
     public function __construct()
     {
         parent::__construct();
@@ -140,6 +136,8 @@ class Auth extends CI_Controller
         header('Cache-Control: no-store, private');
     }
 
+    // Muat database dan model hanya saat diperlukan. Konfigurasi db_debug FALSE
+    // agar gangguan database tidak membocorkan detail.
     private function load_users()
     {
         try {
@@ -156,12 +154,15 @@ class Auth extends CI_Controller
 
     public function login()
     {
+        // Login hanya menerima GET dan POST.
         $method = $this->input->method(TRUE);
         if ($method !== 'GET' && $method !== 'POST') {
             header('Allow: GET, POST');
             show_error('Metode tidak diizinkan.', 405);
         }
 
+        // Tolak input array dan password lebih dari 72 byte sebelum validasi.
+        // Password tidak diubah atau disimpan dalam session.
         $data = array('username' => '', 'error' => '');
         if ($method === 'POST') {
             $username = $this->input->post('username', FALSE);
@@ -172,6 +173,7 @@ class Auth extends CI_Controller
             if ( ! is_string($username) || ! is_string($password) || strlen($password) > 72) {
                 $data['error'] = 'Username atau password tidak valid.';
             } else {
+                // Validasi panjang dan format sebelum melakukan query.
                 $this->form_validation->set_rules(
                     'username', 'Username',
                     'required|max_length[50]|regex_match[/\A[a-zA-Z0-9_]+\z/]'
@@ -182,14 +184,17 @@ class Auth extends CI_Controller
                 if ($this->form_validation->run() === FALSE) {
                     $data['error'] = 'Username atau password tidak valid.';
                 } else {
+                    // Model membedakan query gagal dari akun tidak ditemukan.
                     $this->load_users();
                     $user = $this->User_model->find_by_username($username);
                     if ($user === FALSE) {
                         show_error('Layanan sementara tidak tersedia.', 503);
                     }
+                    // Kegagalan login biasa memakai pesan yang sama.
                     if ($user === NULL || ! password_verify($password, $user['password_hash'])) {
                         $data['error'] = 'Username atau password tidak valid.';
                     } else {
+                        // Regenerasi ID session sebelum menyimpan identitas.
                         $this->session->sess_regenerate(TRUE);
                         $this->session->set_userdata('user_id', (int) $user['id']);
                         redirect('dashboard');
@@ -203,6 +208,7 @@ class Auth extends CI_Controller
 
     public function dashboard()
     {
+        // Periksa metode dan ID session, termasuk pada URL controller langsung.
         if ($this->input->method(TRUE) !== 'GET') {
             header('Allow: GET');
             show_error('Metode tidak diizinkan.', 405);
@@ -212,6 +218,7 @@ class Auth extends CI_Controller
             redirect('login');
             return;
         }
+        // Ambil ulang pengguna dan peran terbaru dari database pada setiap request.
         $this->load_users();
         $user = $this->User_model->find_by_id((int) $id);
         if ($user === FALSE) {
@@ -230,6 +237,8 @@ class Auth extends CI_Controller
 
     public function logout()
     {
+        // CSRF diperiksa framework sebelum method ini; logout hanya menerima POST
+        // dan menghancurkan session tanpa bergantung pada database.
         if ($this->input->method(TRUE) !== 'POST') {
             header('Allow: POST');
             show_error('Metode tidak diizinkan.', 405);
@@ -239,13 +248,6 @@ class Auth extends CI_Controller
     }
 }
 CODE
-				, 'explanations' => array(
-					'Constructor memuat helper dan library; load_users memuat database dan model hanya saat diperlukan. db_debug FALSE wajib dikonfigurasi agar gangguan database tidak membocorkan detail.',
-					'Login hanya menerima GET dan POST, menolak input array dan password lebih dari 72 byte, memvalidasi panjang dan format, serta tidak mengubah atau menyimpan password di session.',
-					'Model membedakan query gagal dari akun tidak ditemukan; kegagalan login biasa memakai pesan yang sama. Regenerasi ID session dilakukan sebelum menyimpan identitas.',
-					'Dashboard memeriksa ID dan mengambil peran terbaru dari database setiap request, termasuk lewat URL controller langsung.',
-					'Logout menolak metode selain POST dan menghancurkan session tanpa bergantung pada database. CSRF diperiksa framework sebelum method dipanggil; no-store membatasi penyimpanan respons di cache.'
-				)
 			),
 			array(
 				'title' => 'Kode lengkap MVC — model pengguna',
@@ -257,6 +259,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class User_model extends CI_Model
 {
+    // Ambil hash untuk verifikasi tanpa mencari berdasarkan password.
+    // FALSE menandakan query gagal; row_array menghasilkan NULL jika tidak ada baris.
     public function find_by_username($username)
     {
         try {
@@ -269,6 +273,8 @@ class User_model extends CI_Model
         }
     }
 
+    // Ambil peran terbaru untuk otorisasi tanpa mengambil hash.
+    // Exception dan query gagal kembali sebagai FALSE, akun tidak ditemukan sebagai NULL.
     public function find_by_id($id)
     {
         try {
@@ -282,11 +288,6 @@ class User_model extends CI_Model
     }
 }
 CODE
-				, 'explanations' => array(
-					'find_by_username mengambil hash untuk verifikasi tanpa mencari berdasarkan password.',
-					'find_by_id tidak mengambil hash dan menyediakan peran terbaru untuk otorisasi.',
-					'Kegagalan query atau exception diteruskan sebagai FALSE; row_array menghasilkan NULL jika tidak ada baris.'
-				)
 			),
 			array(
 				'title' => 'Kode lengkap MVC — view login',
@@ -311,11 +312,14 @@ CODE
 <body>
 <main>
     <h1>Login latihan</h1>
+    <!-- Escape pesan saat ditampilkan agar diperlakukan sebagai teks HTML. -->
     <?php if ($error !== ''): ?>
         <p class="error" role="alert"><?= html_escape($error) ?></p>
     <?php endif; ?>
+    <!-- form_open menghasilkan form POST dan token CSRF ketika perlindungan aktif. -->
     <?= form_open('login') ?>
         <label for="username">Username</label>
+        <!-- Escape username; password tidak diisi kembali setelah gagal. -->
         <input id="username" name="username" maxlength="50" required
                autocomplete="username" value="<?= html_escape($username) ?>">
         <label for="password">Password</label>
@@ -323,6 +327,7 @@ CODE
                required autocomplete="current-password">
         <button type="submit">Masuk</button>
     <?= form_close() ?>
+    <!-- Pengguna non-admin dapat mengakhiri session dari halaman login. -->
     <?php if ($this->session->userdata('user_id')): ?>
         <?= form_open('logout') ?>
             <button type="submit">Keluar dari session saat ini</button>
@@ -332,11 +337,6 @@ CODE
 </body>
 </html>
 CODE
-				, 'explanations' => array(
-					'form_open menghasilkan form POST beserta hidden token CSRF ketika perlindungan aktif.',
-					'Username dan pesan di-escape saat ditampilkan; password tidak diisi kembali setelah gagal.',
-					'Form logout tambahan memungkinkan pengguna non-admin mengakhiri session dari halaman login.'
-				)
 			),
 			array(
 				'title' => 'Kode lengkap MVC — view dashboard',
@@ -358,8 +358,10 @@ CODE
 <body>
 <main>
     <h1>Dashboard admin</h1>
+    <!-- Escape username dari database sebagai teks HTML. -->
     <p>Selamat datang, <?= html_escape($username) ?>.</p>
     <p>Ini hanya contoh lokal, bukan akses ke CRUD siswa.</p>
+    <!-- Logout memakai form POST dengan token CSRF, bukan tautan GET. -->
     <?= form_open('logout') ?>
         <button type="submit">Keluar</button>
     <?= form_close() ?>
@@ -367,10 +369,6 @@ CODE
 </body>
 </html>
 CODE
-				, 'explanations' => array(
-					'Username dari database di-escape sebagai teks HTML.',
-					'Logout memakai form POST dengan token CSRF, bukan tautan GET.'
-				)
 			)
 		),
 		'exercise' => array(

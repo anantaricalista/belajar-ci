@@ -11,8 +11,7 @@ class Curriculum_model extends CI_Model {
 
 		$this->append_snapshot($modules['routing-controller'], array(array(
 			'file' => 'application/controllers/Siswa.php',
-			'code' => $modules['routing-controller']['sections'][0]['code'],
-			'explanations' => array('Controller ini menerima URL daftar dan detail; model dan view baru dibuat di modul berikutnya.')
+			'code' => $modules['routing-controller']['sections'][0]['code']
 		)), 'Pada tahap ini belum ada model atau view siswa. Pertahankan konfigurasi URL, .htaccess, dan route dari bagian sebelumnya.');
 
 		$this->append_snapshot($modules['views'], $snapshots['views'],
@@ -96,8 +95,7 @@ class Curriculum_model extends CI_Model {
 				'title' => 'Kode terbaru: '.$file['file'],
 				'paragraphs' => array('Lokasi file: '.$file['file'].'.'),
 				'file' => $file['file'],
-				'code' => $file['code'],
-				'explanations' => $file['explanations']
+				'code' => $file['code']
 			);
 		}
 	}

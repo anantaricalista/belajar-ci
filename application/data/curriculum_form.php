@@ -22,13 +22,12 @@ return array(
 				),
 				'file' => 'application/config/routes.php — route yang sudah ada',
 				'code' => <<<'CODE'
+// Daftar memakai route ini; detail hanya cocok untuk ID numerik.
+// create bukan angka sehingga ditangani routing default jika tidak ada route lain yang menangkapnya.
 $route['siswa'] = 'siswa/index';
 $route['siswa/(:num)'] = 'siswa/detail/$1';
 CODE
-				, 'explanations' => array(
-					'Route pertama membuka daftar, sedangkan (:num) hanya menerima angka untuk detail.',
-					'siswa/create bukan angka, sehingga tidak cocok dengan route detail; routing default CI3 memanggil method create pada controller Siswa. Tidak perlu menambahkan route create jika tidak ada route lain yang menangkapnya.'
-				)
+
 			),
 			array(
 				'title' => 'Alur GET, POST, dan redirect',
@@ -38,15 +37,14 @@ CODE
 				),
 				'file' => 'Alur request',
 				'code' => <<<'CODE'
+// GET hanya menampilkan form tanpa mengubah database.
 GET  siswa/create -> tampilkan form
+// Validasi gagal tidak menyimpan data; form dan kesalahan ditampilkan lagi.
 POST siswa/create -> validasi gagal -> tampilkan form dan kesalahan
+// Insert sukses diikuti redirect agar browser meminta daftar dengan GET.
 POST siswa/create -> validasi berhasil -> insert -> redirect siswa
 CODE
-				, 'explanations' => array(
-					'GET hanya menampilkan form dan tidak mengubah database.',
-					'POST yang gagal tidak memanggil model untuk menyimpan.',
-					'Setelah insert sukses, browser menerima redirect dan meminta halaman daftar dengan GET.'
-				)
+
 			),
 			array(
 				'title' => 'Aturan validasi di server',
@@ -56,17 +54,15 @@ CODE
 				),
 				'file' => 'Bagian dari Siswa::create()',
 				'code' => <<<'CODE'
+// required dan regex_match menolak input kosong atau hanya spasi; trim dan max_length menyesuaikan data.
+// NIS juga harus unik; constraint UNIQUE tetap diperlukan di database.
 $this->form_validation->set_rules('nis', 'NIS', 'required|regex_match[/\S/]|trim|max_length[20]|is_unique[siswa.nis]');
 $this->form_validation->set_rules('nama', 'Nama', 'required|regex_match[/\S/]|trim|max_length[100]');
 $this->form_validation->set_rules('kelas', 'Kelas', 'required|regex_match[/\S/]|trim|max_length[30]');
+// Pilihan dibatasi ke nilai enum L dan P; validasi tidak menggantikan escaping output.
 $this->form_validation->set_rules('jenis_kelamin', 'Jenis kelamin', 'required|in_list[L,P]');
 CODE
-				, 'explanations' => array(
-					'required menolak nilai kosong; regex_match menolak teks yang hanya berisi whitespace sebelum trim, dan max_length menyesuaikan batas kolom.',
-					'is_unique[siswa.nis] menolak NIS yang sudah tersimpan; constraint UNIQUE juga melindungi database.',
-					'in_list membatasi jenis_kelamin ke nilai enum L dan P.',
-					'Aturan diterapkan di server; validasi tidak menggantikan escaping output.'
-				)
+
 			),
 			array(
 				'title' => 'Form helper, CSRF, dan nilai sebelumnya',
@@ -76,17 +72,16 @@ CODE
 				),
 				'file' => 'Cuplikan view siswa/create.php',
 				'code' => <<<'CODE'
+<!-- Pesan memakai delimiter HTML standar CI3 dan label aturan yang tetap. -->
 <?= validation_errors() ?>
+<!-- form_open membuat POST dan token CSRF jika aktif; form_close menutup form. -->
 <?= form_open('siswa/create') ?>
 <label for="nis">NIS</label>
+<!-- set_value mempertahankan isian; html_escape mengamankan atribut tepat sekali. -->
 <input id="nis" name="nis" value="<?= html_escape(set_value('nis', '', FALSE)) ?>">
 <?= form_close() ?>
 CODE
-				, 'explanations' => array(
-					'validation_errors menampilkan pesan aturan dengan delimiter HTML standar CI3; nama field pada aturan adalah label tetap, bukan input pengguna.',
-					'form_open membuat form POST dan hidden token jika CSRF aktif; form_close menutupnya.',
-					'set_value mengambil kembali input; html_escape mengamankannya dalam atribut HTML. Snapshot lengkap di bawah juga memiliki nama, kelas, dan jenis kelamin.'
-				)
+
 			),
 			array(
 				'title' => 'Simpan hanya field yang diizinkan',
@@ -96,15 +91,14 @@ CODE
 				),
 				'file' => 'Bagian dari Siswa_model.php',
 				'code' => <<<'CODE'
+// Controller mengirim hanya nis, nama, kelas, dan jenis_kelamin; database menyediakan id dan created_at.
+// Query Builder mengembalikan hasil insert untuk diperiksa controller.
 public function tambah($data)
 {
     return $this->db->insert('siswa', $data);
 }
 CODE
-				, 'explanations' => array(
-					'insert menggunakan Query Builder dan mengembalikan hasil operasi untuk diperiksa controller.',
-					'Data yang dikirim hanya berisi nis, nama, kelas, dan jenis_kelamin; id serta created_at tidak perlu diisi manual.'
-				)
+
 			),
 			array(
 				'title' => 'Menuju jQuery dan modal',
@@ -124,6 +118,7 @@ CODE
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Siswa extends CI_Controller {
+    // Muat dependensi yang diperlukan daftar, detail, dan form.
     public function __construct()
     {
         parent::__construct();
@@ -133,12 +128,14 @@ class Siswa extends CI_Controller {
         $this->load->library('form_validation');
     }
 
+    // Tampilkan daftar dari model.
     public function index()
     {
         $data['siswa'] = $this->Siswa_model->semua();
         $this->load->view('siswa/index', $data);
     }
 
+    // Periksa ID dan tampilkan 404 jika ID tidak valid atau siswa tidak ditemukan.
     public function detail($id = NULL)
     {
         if ($id === NULL || ! ctype_digit((string) $id))
@@ -156,6 +153,7 @@ class Siswa extends CI_Controller {
         $this->load->view('siswa/detail', $data);
     }
 
+    // GET menampilkan form; selain GET dan POST ditolak.
     public function create()
     {
         $method = $this->input->method();
@@ -168,6 +166,7 @@ class Siswa extends CI_Controller {
         $data['simpan_error'] = '';
         if ($method === 'post')
         {
+            // Validasi field di server; NIS unik dan jenis kelamin hanya L atau P.
             $this->form_validation->set_rules('nis', 'NIS', 'required|regex_match[/\S/]|trim|max_length[20]|is_unique[siswa.nis]');
             $this->form_validation->set_rules('nama', 'Nama', 'required|regex_match[/\S/]|trim|max_length[100]');
             $this->form_validation->set_rules('kelas', 'Kelas', 'required|regex_match[/\S/]|trim|max_length[30]');
@@ -175,12 +174,14 @@ class Siswa extends CI_Controller {
 
             if ($this->form_validation->run() !== FALSE)
             {
+                // Hanya empat field yang divalidasi dikirim ke model.
                 $siswa = array(
                     'nis' => $this->input->post('nis'),
                     'nama' => $this->input->post('nama'),
                     'kelas' => $this->input->post('kelas'),
                     'jenis_kelamin' => $this->input->post('jenis_kelamin')
                 );
+                // Insert sukses diikuti redirect; kegagalan memakai pesan umum.
                 if ($this->Siswa_model->tambah($siswa))
                 {
                     redirect('siswa');
@@ -190,17 +191,12 @@ class Siswa extends CI_Controller {
             }
         }
 
+        // GET, validasi gagal, dan insert gagal menampilkan form.
         $this->load->view('siswa/create', $data);
     }
 }
 CODE
-				, 'explanations' => array(
-					'Constructor memuat semua dependensi; index dan detail tetap menggunakan model tahap sebelumnya.',
-					'detail memeriksa ID dan menampilkan 404 jika siswa tidak ada.',
-					'create hanya menerima GET dan POST; GET langsung menampilkan form.',
-					'POST hanya memanggil tambah setelah semua aturan lolos, dan mengambil empat field secara eksplisit.',
-					'Insert sukses redirect ke daftar; kegagalan validasi atau insert menampilkan form kembali.'
-				)
+
 			),
 			array(
 				'title' => 'Snapshot lengkap: model Siswa_model.php',
@@ -211,29 +207,28 @@ CODE
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Siswa_model extends CI_Model {
+    // Ambil semua siswa menurut nama sebagai daftar array.
     public function semua()
     {
         return $this->db->order_by('nama', 'ASC')
             ->get('siswa')->result_array();
     }
 
+    // Cari berdasarkan ID dan kembalikan satu baris atau NULL.
     public function cari($id)
     {
         return $this->db->get_where('siswa', array('id' => $id))
             ->row_array();
     }
 
+    // Kembalikan hasil insert Query Builder kepada controller.
     public function tambah($data)
     {
         return $this->db->insert('siswa', $data);
     }
 }
 CODE
-				, 'explanations' => array(
-					'semua mengambil seluruh baris menurut nama; result_array menghasilkan daftar array.',
-					'cari memakai ID sebagai kondisi dan row_array menghasilkan satu baris atau NULL.',
-					'tambah menjalankan insert melalui Query Builder dan mengembalikan hasilnya.'
-				)
+
 			),
 			array(
 				'title' => 'Snapshot lengkap: view daftar',
@@ -248,7 +243,9 @@ CODE
 </head>
 <body>
     <h1>Daftar siswa</h1>
+    <!-- site_url mengikuti konfigurasi proyek; tautan ini membuka form tambah. -->
     <p><a href="<?= html_escape(site_url('siswa/create')) ?>">Tambah siswa</a></p>
+    <!-- Tampilkan pesan saat kosong atau tabel berisi nilai yang di-escape. -->
     <?php if (empty($siswa)): ?>
         <p>Belum ada siswa.</p>
     <?php else: ?>
@@ -263,6 +260,7 @@ CODE
                     <td><?= html_escape($item['nama']) ?></td>
                     <td><?= html_escape($item['kelas']) ?></td>
                     <td><?= html_escape($item['jenis_kelamin']) ?></td>
+                    <!-- ID pada tautan detail cocok dengan route numerik. -->
                     <td><a href="<?= html_escape(site_url('siswa/'.$item['id'])) ?>">Lihat</a></td>
                 </tr>
             <?php endforeach; ?>
@@ -272,11 +270,7 @@ CODE
 </body>
 </html>
 CODE
-				, 'explanations' => array(
-					'site_url membuat tautan sesuai base_url dan index_page proyek.',
-					'Daftar kosong memiliki pesan; setiap nilai siswa dan URL di-escape untuk konteks HTML.',
-					'Tautan detail memakai ID pada route siswa/(:num).'
-				)
+
 			),
 			array(
 				'title' => 'Snapshot lengkap: view detail',
@@ -291,6 +285,7 @@ CODE
 </head>
 <body>
     <h1>Detail siswa</h1>
+    <!-- Controller memberikan satu siswa; escape setiap kolom saat ditampilkan. -->
     <dl>
         <dt>ID</dt><dd><?= html_escape($siswa['id']) ?></dd>
         <dt>NIS</dt><dd><?= html_escape($siswa['nis']) ?></dd>
@@ -299,14 +294,12 @@ CODE
         <dt>Jenis kelamin</dt><dd><?= html_escape($siswa['jenis_kelamin']) ?></dd>
         <dt>Dibuat</dt><dd><?= html_escape($siswa['created_at']) ?></dd>
     </dl>
+    <!-- site_url mengikuti konfigurasi proyek dan URL di-escape untuk atribut HTML. -->
     <p><a href="<?= html_escape(site_url('siswa')) ?>">Kembali ke daftar</a></p>
 </body>
 </html>
 CODE
-				, 'explanations' => array(
-					'View menerima satu array siswa dari controller dan menampilkan semua kolom.',
-					'html_escape melindungi output teks dan atribut URL; tautan kembali menuju daftar.'
-				)
+
 			),
 			array(
 				'title' => 'Snapshot lengkap: view form tambah',
@@ -321,11 +314,15 @@ CODE
 </head>
 <body>
     <h1>Tambah siswa</h1>
+    <!-- Tampilkan kesalahan validasi atau pesan umum ketika insert gagal. -->
     <?= validation_errors() ?>
     <?php if ($simpan_error !== ''): ?>
         <p><?= html_escape($simpan_error) ?></p>
     <?php endif; ?>
+    <!-- form_open membuat POST dan token CSRF jika aktif. -->
     <?= form_open('siswa/create') ?>
+        <!-- Label, id, dan name cocok dengan aturan; nilai input di-escape sekali setelah set_value. -->
+        <!-- maxlength membantu pengguna; server tetap memeriksa panjang dan field wajib. -->
         <p>
             <label for="nis">NIS</label>
             <input id="nis" name="nis" type="text" maxlength="20" value="<?= html_escape(set_value('nis', '', FALSE)) ?>">
@@ -338,6 +335,7 @@ CODE
             <label for="kelas">Kelas</label>
             <input id="kelas" name="kelas" type="text" maxlength="30" value="<?= html_escape(set_value('kelas', '', FALSE)) ?>">
         </p>
+        <!-- Nilai select hanya dibandingkan dengan L atau P, bukan dicetak. -->
         <p>
             <label for="jenis_kelamin">Jenis kelamin</label>
             <select id="jenis_kelamin" name="jenis_kelamin">
@@ -346,19 +344,14 @@ CODE
                 <option value="P"<?= set_value('jenis_kelamin', '', FALSE) === 'P' ? ' selected' : '' ?>>Perempuan</option>
             </select>
         </p>
+        <!-- Tombol mengirim form; tautan kembali di bawah tidak mengubah data. -->
         <button type="submit">Simpan</button>
     <?= form_close() ?>
     <p><a href="<?= html_escape(site_url('siswa')) ?>">Kembali ke daftar</a></p>
 </body>
 </html>
 CODE
-				, 'explanations' => array(
-					'validation_errors menampilkan kesalahan server; simpan_error menampilkan pesan umum jika insert gagal.',
-					'form_open menghasilkan POST dan token CSRF jika aktif. Setiap field memiliki label, id, dan name yang cocok dengan aturan.',
-					'set_value dengan escaping bawaan dinonaktifkan kemudian di-escape sekali pada atribut input; pada select nilainya hanya dibandingkan dengan L atau P dan tidak dicetak.',
-					'maxlength membantu pengguna, tetapi batas panjang, required, dan pilihan tetap diperiksa di server.',
-					'Tombol mengirim form; tautan kembali tidak mengubah data.'
-				)
+
 			)
 		),
 		'exercise' => array(
