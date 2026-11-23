@@ -27,7 +27,7 @@ class Curriculum_model extends CI_Model {
 			'application/models/Siswa_model.php',
 			'application/controllers/Siswa.php',
 			'application/views/siswa/index.php',
-			'assets/js/siswa.js'
+			'application/views/siswa/js.php'
 		);
 		$project_snapshot = array();
 		foreach ($project_files as $file)
@@ -48,15 +48,14 @@ class Curriculum_model extends CI_Model {
 			}
 		}
 
-		$project_note = 'Ini adalah versi lengkap proyek satu halaman setelah modul ini. Pertahankan database dan .htaccess dari modul sebelumnya; ubah baris config dan routes yang ditunjukkan, lalu ganti seluruh isi model, controller dan view serta buat file JavaScript. Hapus route siswa/(:num) lama karena aplikasi ini tidak lagi memakai halaman detail terpisah. Form create biasa dari tahap sebelumnya digantikan modal; view lama tidak lagi digunakan. Contoh hanya untuk data fiktif lokal dan belum memiliki login.';
+		$project_note = 'Ini adalah versi lengkap proyek satu halaman setelah modul ini. Pertahankan database dan .htaccess dari modul sebelumnya; ubah baris config dan routes yang ditunjukkan, lalu ganti seluruh isi model, controller dan view serta buat view siswa/js.php. Hapus route siswa/(:num) lama karena aplikasi ini tidak lagi memakai halaman detail terpisah. Form create biasa dari tahap sebelumnya digantikan modal; view lama tidak lagi digunakan. Contoh hanya untuk data fiktif lokal dan belum memiliki login.';
 		$offline_found = FALSE;
 		foreach ($project_sections as $section)
 		{
 			if (isset($section['file']) && $section['file'] === 'application/views/siswa/index.php (pengganti URL CDN)')
 			{
 				$section['title'] = 'Pilihan offline: simpan library di proyek';
-				$section['paragraphs'][3] = 'Pada view lengkap di akhir modul, ganti kedua link CDN di head dan keempat script CDN di akhir body dengan fragmen lokal berikut; pertahankan konfigurasi window.siswaConfig dan script siswa.js terakhir. Jangan menambahkan keduanya sekaligus. Pastikan base_url sesuai alamat aplikasi dan helper URL dimuat oleh controller.';
-				$section['explanations'][2] = 'Script aplikasi tetap berasal dari assets/js/siswa.js yang tersedia pada kode lengkap akhir modul; jangan menggandakan tag yang sudah ada.';
+				$section['paragraphs'][3] = 'Pada view lengkap di akhir modul, ganti kedua link CSS dan keempat script CDN dengan URL lokal berikut. Pertahankan window.siswaConfig dan satu pemanggilan view siswa/js setelah semua script vendor. Jangan memuat vendor CDN dan lokal sekaligus. Pastikan base_url sesuai aplikasi dan helper URL dimuat oleh controller.';
 				$project_modules['jquery-datatables']['sections'][] = $section;
 				$offline_found = TRUE;
 				break;
